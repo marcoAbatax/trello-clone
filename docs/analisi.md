@@ -99,3 +99,29 @@ Il seguente diagramma rappresenta le principali iterazioni tra l'attore e l'uten
 L'utente può gestire board, liste e card, aggiungere memebri alle board, spostare le card tra liste e asseganrle ai membri
 
 ![Use Case Diagram](uml/use-case-diagram.png)
+
+## 7. Class Diagram
+
+Il diagramma delle classi rappresente le principali entità del dominio e le relazioni tra esse.
+
+Le principali sono:
+-User
+-Board
+-BoardMember
+-BoardList
+-Card
+-CardAssignment
+
+Le relazioni principali sono le seguenti:
+
+-un utente può appartenere a più board
+-un board può avere più membri
+-una board contiente più liste
+-una lista appartiene ad una sola board
+-una lista contiene più card
+-una card appartiene ad una sola lista
+-una card può essere asseganta ad uno o più utenti
+-un utente può essere assegnato a zero o più card
+
+![Class Diagram](uml/class-diagram.png)
+
