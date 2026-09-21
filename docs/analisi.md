@@ -125,3 +125,48 @@ Le relazioni principali sono le seguenti:
 
 ![Class Diagram](uml/class-diagram.png)
 
+## 8. Architettura MVP
+
+L'applicazione utilizza il pattern architetturale Mode-View-Presenter, in modo da separare la logica di dominio, la rappresentazione grafica e la gestione delle interazioni dell'utente
+
+### Model
+
+Il Model contiene i dati dell'applicazione e la logica di dominio
+
+Le principali calssi del Model sono:
+
+-User
+-Board
+-BoardMember
+-BoardList
+-card
+-CardAssignment
+
+Il Model si occupa esclusivamente della rappresentazione grafica e dell'interazione con il DOM
+
+Le principali View previste sono:
+
+-AppView
+-BoardView
+-ListView
+-cardView
+-ModalView
+
+La View non accede direttamente al Model e non contiene la logica di business
+
+### Presenter
+
+Il presenter coordina le interazioni tra Model e View
+
+Riceve gli eventi generati dalla View, utilizza il Model per eseguire le operazioni richieste e successivamente istruisce la View su come aggiornare l'interfaccia
+
+La classe principale prevista è:
+
+-AppPresenter
+
+### Diagramma dell'architettura MVP
+
+Il seguente diagramma rappresenta la sepaazione tra Model, view e Presenter all'interno del sistema.
+
+![Architettura MVP](uml/mvp-architecture.png)
+
