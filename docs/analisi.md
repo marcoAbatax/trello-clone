@@ -142,7 +142,11 @@ Le principali calssi del Model sono:
 -card
 -CardAssignment
 
-Il Model si occupa esclusivamente della rappresentazione grafica e dell'interazione con il DOM
+Il Model si occupa inoltre della validazione dei dati e della gestione dello stato dell'applicazione
+
+### View
+
+La view si occupa esclusivamente della rappresentazione grafica e dell'iterazione con il DOM
 
 Le principali View previste sono:
 
