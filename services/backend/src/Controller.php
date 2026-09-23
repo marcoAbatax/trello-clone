@@ -4,12 +4,14 @@ require_once __DIR__ . '/database/Database.php';
 require_once __DIR__ . '/gateways/UserGateway.php';
 require_once __DIR__ . '/gateways/BoardGateway.php';
 require_once __DIR__ . '/gateways/BoardListGateway.php';
+require_once __DIR__ . '/gateways/CardGateway.php';
 
 class Controller
 {
     private UserGateway $userGateway;
     private BoardGateway $boardGateway;
     private BoardListGateway $boardListGateway;
+    private CardGateway $cardGateway;
 
     public function __construct()
     {
@@ -19,6 +21,7 @@ class Controller
         $this->userGateway = new UserGateway($connection);
         $this->boardGateway = new BoardGateway($connection);
         $this->boardListGateway = new BoardListGateway($connection);
+        $this->cardGateway = new CardGateway($connection);
     }
 
     public function handleRequest(): void
@@ -121,6 +124,39 @@ class Controller
 
             if ($method === 'DELETE') {
                 $this->deleteList($id);
+                return;
+            }
+        }
+
+        // =========================================================
+        // CARDS
+        // =========================================================
+
+        if ($method === 'GET' && $path === '/cards') {
+            $this->getCards();
+            return;
+        }
+
+        if ($method === 'POST' && $path === '/cards') {
+            $this->createCard();
+            return;
+        }
+
+        if (preg_match('#^/cards/(\d+)$#', $path, $matches)) {
+            $id = (int) $matches[1];
+
+            if ($method === 'GET') {
+                $this->getCardById($id);
+                return;
+            }
+
+            if ($method === 'PUT') {
+                $this->updateCard($id);
+                return;
+            }
+
+            if ($method === 'DELETE') {
+                $this->deleteCard($id);
                 return;
             }
         }
@@ -437,6 +473,116 @@ class Controller
 
         echo json_encode([
             'message' => 'Lista eliminata'
+        ]);
+    }
+
+    // =============================================================
+    // CARDS
+    // =============================================================
+
+    private function getCards(): void
+    {
+        $cards = $this->cardGateway->findAll();
+
+        echo json_encode($cards);
+    }
+
+    private function getCardById(int $id): void
+    {
+        $card = $this->cardGateway->findById($id);
+
+        if (!$card) {
+            http_response_code(404);
+
+            echo json_encode([
+                'error' => 'Card non trovata'
+            ]);
+
+            return;
+        }
+
+        echo json_encode($card);
+    }
+
+    private function createCard(): void
+    {
+        $data = json_decode(
+            file_get_contents('php://input'),
+            true
+        );
+
+        if (
+            !is_array($data) ||
+            !isset($data['list_id']) ||
+            !isset($data['title']) ||
+            !isset($data['position'])
+        ) {
+            http_response_code(400);
+
+            echo json_encode([
+                'error' => 'list_id, title e position sono obbligatori'
+            ]);
+
+            return;
+        }
+
+        $description = $data['description'] ?? null;
+
+        $id = $this->cardGateway->create(
+            (int) $data['list_id'],
+            $data['title'],
+            $description,
+            (int) $data['position']
+        );
+
+        http_response_code(201);
+
+        echo json_encode([
+            'id' => $id
+        ]);
+    }
+
+    private function updateCard(int $id): void
+    {
+        $data = json_decode(
+            file_get_contents('php://input'),
+            true
+        );
+
+        if (
+            !is_array($data) ||
+            !isset($data['title']) ||
+            !isset($data['position'])
+        ) {
+            http_response_code(400);
+
+            echo json_encode([
+                'error' => 'title e position sono obbligatori'
+            ]);
+
+            return;
+        }
+
+        $description = $data['description'] ?? null;
+
+        $this->cardGateway->update(
+            $id,
+            $data['title'],
+            $description,
+            (int) $data['position']
+        );
+
+        echo json_encode([
+            'message' => 'Card aggiornata'
+        ]);
+    }
+
+    private function deleteCard(int $id): void
+    {
+        $this->cardGateway->delete($id);
+
+        echo json_encode([
+            'message' => 'Card eliminata'
         ]);
     }
 }
