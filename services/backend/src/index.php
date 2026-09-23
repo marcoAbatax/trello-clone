@@ -4,18 +4,13 @@ ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
 
-require_once __DIR__ . '/database/Database.php';
-
 header('Content-Type: application/json');
 
+require_once __DIR__ . '/Controller.php';
+
 try {
-    $database = new Database();
-    $connection = $database->getConnection();
-
-    $statement = $connection->query("SELECT * FROM users");
-    $users = $statement->fetchAll();
-
-    echo json_encode($users);
+    $controller = new Controller();
+    $controller->handleRequest();
 
 } catch (Throwable $exception) {
     http_response_code(500);
