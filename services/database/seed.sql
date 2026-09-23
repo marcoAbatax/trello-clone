@@ -12,7 +12,7 @@ INSERT INTO board_members(board_id, user_id) VALUES
 INSERT INTO board_lists (board_id, title, position) VALUES
 (1, 'Da fare', 1),
 (1, 'In corso', 2),
-(1, 'Completato' 3);
+(1, 'Completato', 3);
 
 INSERT INTO cards (list_id, title, description, position)VALUES
 (1, 'definire requisiti', 'Scrivere requisiti funzionali e non funzionali', 1),
