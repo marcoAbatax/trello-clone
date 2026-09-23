@@ -5,6 +5,7 @@ require_once __DIR__ . '/gateways/UserGateway.php';
 require_once __DIR__ . '/gateways/BoardGateway.php';
 require_once __DIR__ . '/gateways/BoardListGateway.php';
 require_once __DIR__ . '/gateways/CardGateway.php';
+require_once __DIR__ . '/gateways/BoardMemberGateway.php';
 
 class Controller
 {
@@ -12,6 +13,7 @@ class Controller
     private BoardGateway $boardGateway;
     private BoardListGateway $boardListGateway;
     private CardGateway $cardGateway;
+    private BoardMemberGateway $boardMemberGateway;
 
     public function __construct()
     {
@@ -22,6 +24,7 @@ class Controller
         $this->boardGateway = new BoardGateway($connection);
         $this->boardListGateway = new BoardListGateway($connection);
         $this->cardGateway = new CardGateway($connection);
+        $this->boardMemberGateway = new BoardMemberGateway($connection);
     }
 
     public function handleRequest(): void
@@ -60,6 +63,45 @@ class Controller
                 $this->deleteUser($id);
                 return;
             }
+        }
+
+        // =========================================================
+        // BOARD MEMBERS
+        // =========================================================
+
+        if (
+            $method === 'GET' &&
+            preg_match('#^/boards/(\d+)/members$#', $path, $matches)
+        ) {
+            $boardId = (int) $matches[1];
+
+            $this->getBoardMembers($boardId);
+            return;
+        }
+
+        if (
+            $method === 'POST' &&
+            preg_match('#^/boards/(\d+)/members$#', $path, $matches)
+        ) {
+            $boardId = (int) $matches[1];
+
+            $this->addBoardMember($boardId);
+            return;
+        }
+
+        if (
+            $method === 'DELETE' &&
+            preg_match(
+                '#^/boards/(\d+)/members/(\d+)$#',
+                $path,
+                $matches
+            )
+        ) {
+            $boardId = (int) $matches[1];
+            $userId = (int) $matches[2];
+
+            $this->removeBoardMember($boardId, $userId);
+            return;
         }
 
         // =========================================================
@@ -369,6 +411,133 @@ class Controller
 
         echo json_encode([
             'message' => 'Board eliminata'
+        ]);
+    }
+
+    // =============================================================
+    // BOARD MEMBERS
+    // =============================================================
+
+    private function getBoardMembers(int $boardId): void
+    {
+        $board = $this->boardGateway->findById($boardId);
+
+        if (!$board) {
+            http_response_code(404);
+
+            echo json_encode([
+                'error' => 'Board non trovata'
+            ]);
+
+            return;
+        }
+
+        $members = $this->boardMemberGateway->findByBoardId($boardId);
+
+        echo json_encode($members);
+    }
+
+    private function addBoardMember(int $boardId): void
+    {
+        $board = $this->boardGateway->findById($boardId);
+
+        if (!$board) {
+            http_response_code(404);
+
+            echo json_encode([
+                'error' => 'Board non trovata'
+            ]);
+
+            return;
+        }
+
+        $data = json_decode(
+            file_get_contents('php://input'),
+            true
+        );
+
+        if (
+            !is_array($data) ||
+            !isset($data['user_id'])
+        ) {
+            http_response_code(400);
+
+            echo json_encode([
+                'error' => 'user_id è obbligatorio'
+            ]);
+
+            return;
+        }
+
+        $userId = (int) $data['user_id'];
+
+        $user = $this->userGateway->findById($userId);
+
+        if (!$user) {
+            http_response_code(404);
+
+            echo json_encode([
+                'error' => 'Utente non trovato'
+            ]);
+
+            return;
+        }
+
+        if ($this->boardMemberGateway->isMember($boardId, $userId)) {
+            http_response_code(409);
+
+            echo json_encode([
+                'error' => 'Utente già membro della board'
+            ]);
+
+            return;
+        }
+
+        $this->boardMemberGateway->addMember(
+            $boardId,
+            $userId
+        );
+
+        http_response_code(201);
+
+        echo json_encode([
+            'message' => 'Membro aggiunto alla board'
+        ]);
+    }
+
+    private function removeBoardMember(
+        int $boardId,
+        int $userId
+    ): void {
+        $board = $this->boardGateway->findById($boardId);
+
+        if (!$board) {
+            http_response_code(404);
+
+            echo json_encode([
+                'error' => 'Board non trovata'
+            ]);
+
+            return;
+        }
+
+        if (!$this->boardMemberGateway->isMember($boardId, $userId)) {
+            http_response_code(404);
+
+            echo json_encode([
+                'error' => 'Utente non membro della board'
+            ]);
+
+            return;
+        }
+
+        $this->boardMemberGateway->removeMember(
+            $boardId,
+            $userId
+        );
+
+        echo json_encode([
+            'message' => 'Membro rimosso dalla board'
         ]);
     }
 
