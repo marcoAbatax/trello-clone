@@ -3,11 +3,13 @@
 require_once __DIR__ . '/database/Database.php';
 require_once __DIR__ . '/gateways/UserGateway.php';
 require_once __DIR__ . '/gateways/BoardGateway.php';
+require_once __DIR__ . '/gateways/BoardListGateway.php';
 
 class Controller
 {
     private UserGateway $userGateway;
     private BoardGateway $boardGateway;
+    private BoardListGateway $boardListGateway;
 
     public function __construct()
     {
@@ -16,6 +18,7 @@ class Controller
 
         $this->userGateway = new UserGateway($connection);
         $this->boardGateway = new BoardGateway($connection);
+        $this->boardListGateway = new BoardListGateway($connection);
     }
 
     public function handleRequest(): void
@@ -23,9 +26,9 @@ class Controller
         $method = $_SERVER['REQUEST_METHOD'];
         $path = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
 
-        // -------------------------
+        // =========================================================
         // USERS
-        // -------------------------
+        // =========================================================
 
         if ($method === 'GET' && $path === '/users') {
             $this->getUsers();
@@ -56,9 +59,9 @@ class Controller
             }
         }
 
-        // -------------------------
+        // =========================================================
         // BOARDS
-        // -------------------------
+        // =========================================================
 
         if ($method === 'GET' && $path === '/boards') {
             $this->getBoards();
@@ -89,7 +92,43 @@ class Controller
             }
         }
 
-        // Endpoint non trovato
+        // =========================================================
+        // LISTS
+        // =========================================================
+
+        if ($method === 'GET' && $path === '/lists') {
+            $this->getLists();
+            return;
+        }
+
+        if ($method === 'POST' && $path === '/lists') {
+            $this->createList();
+            return;
+        }
+
+        if (preg_match('#^/lists/(\d+)$#', $path, $matches)) {
+            $id = (int) $matches[1];
+
+            if ($method === 'GET') {
+                $this->getListById($id);
+                return;
+            }
+
+            if ($method === 'PUT') {
+                $this->updateList($id);
+                return;
+            }
+
+            if ($method === 'DELETE') {
+                $this->deleteList($id);
+                return;
+            }
+        }
+
+        // =========================================================
+        // ENDPOINT NON TROVATO
+        // =========================================================
+
         http_response_code(404);
 
         echo json_encode([
@@ -97,9 +136,9 @@ class Controller
         ]);
     }
 
-    // ============================================================
+    // =============================================================
     // USERS
-    // ============================================================
+    // =============================================================
 
     private function getUsers(): void
     {
@@ -199,9 +238,9 @@ class Controller
         ]);
     }
 
-    // ============================================================
+    // =============================================================
     // BOARDS
-    // ============================================================
+    // =============================================================
 
     private function getBoards(): void
     {
@@ -294,6 +333,110 @@ class Controller
 
         echo json_encode([
             'message' => 'Board eliminata'
+        ]);
+    }
+
+    // =============================================================
+    // LISTS
+    // =============================================================
+
+    private function getLists(): void
+    {
+        $lists = $this->boardListGateway->findAll();
+
+        echo json_encode($lists);
+    }
+
+    private function getListById(int $id): void
+    {
+        $list = $this->boardListGateway->findById($id);
+
+        if (!$list) {
+            http_response_code(404);
+
+            echo json_encode([
+                'error' => 'Lista non trovata'
+            ]);
+
+            return;
+        }
+
+        echo json_encode($list);
+    }
+
+    private function createList(): void
+    {
+        $data = json_decode(
+            file_get_contents('php://input'),
+            true
+        );
+
+        if (
+            !is_array($data) ||
+            !isset($data['board_id']) ||
+            !isset($data['title']) ||
+            !isset($data['position'])
+        ) {
+            http_response_code(400);
+
+            echo json_encode([
+                'error' => 'board_id, title e position sono obbligatori'
+            ]);
+
+            return;
+        }
+
+        $id = $this->boardListGateway->create(
+            (int) $data['board_id'],
+            $data['title'],
+            (int) $data['position']
+        );
+
+        http_response_code(201);
+
+        echo json_encode([
+            'id' => $id
+        ]);
+    }
+
+    private function updateList(int $id): void
+    {
+        $data = json_decode(
+            file_get_contents('php://input'),
+            true
+        );
+
+        if (
+            !is_array($data) ||
+            !isset($data['title']) ||
+            !isset($data['position'])
+        ) {
+            http_response_code(400);
+
+            echo json_encode([
+                'error' => 'title e position sono obbligatori'
+            ]);
+
+            return;
+        }
+
+        $this->boardListGateway->update(
+            $id,
+            $data['title'],
+            (int) $data['position']
+        );
+
+        echo json_encode([
+            'message' => 'Lista aggiornata'
+        ]);
+    }
+
+    private function deleteList(int $id): void
+    {
+        $this->boardListGateway->delete($id);
+
+        echo json_encode([
+            'message' => 'Lista eliminata'
         ]);
     }
 }
