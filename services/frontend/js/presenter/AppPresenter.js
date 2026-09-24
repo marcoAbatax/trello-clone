@@ -38,6 +38,8 @@ class AppPresenter {
         try {
             const lists = await this.model.getLists();
             const cards = await this.model.getCards();
+            const members = await this.model.getBoardMembers(boardId);
+            const users = await this.model.getUsers();
 
             const boardLists = lists.filter(
                 list => list.board_id == boardId
@@ -51,6 +53,8 @@ class AppPresenter {
                 board,
                 boardLists,
                 cards,
+                members,
+                users,
 
                 () => {
                     this.showBoards();
@@ -124,6 +128,20 @@ class AppPresenter {
                     await this.deleteList(
                         boardId,
                         listId
+                    );
+                },
+
+                async userId => {
+                    await this.addBoardMember(
+                        boardId,
+                        userId
+                    );
+                },
+
+                async userId => {
+                    await this.removeBoardMember(
+                        boardId,
+                        userId
                     );
                 }
             );
@@ -307,6 +325,44 @@ class AppPresenter {
         try {
             await this.model.deleteList(
                 Number(listId)
+            );
+
+            await this.openBoard(boardId);
+
+        } catch (error) {
+            this.view.showError(
+                error.message
+            );
+        }
+    }
+
+    async addBoardMember(
+        boardId,
+        userId
+    ) {
+        try {
+            await this.model.addBoardMember(
+                Number(boardId),
+                Number(userId)
+            );
+
+            await this.openBoard(boardId);
+
+        } catch (error) {
+            this.view.showError(
+                error.message
+            );
+        }
+    }
+
+    async removeBoardMember(
+        boardId,
+        userId
+    ) {
+        try {
+            await this.model.removeBoardMember(
+                Number(boardId),
+                Number(userId)
             );
 
             await this.openBoard(boardId);

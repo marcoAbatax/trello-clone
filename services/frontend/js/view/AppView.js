@@ -15,7 +15,6 @@ export class AppView {
             this.app.innerHTML = `
                 <p>Nessuna board disponibile.</p>
             `;
-
             return;
         }
 
@@ -51,6 +50,8 @@ export class AppView {
         board,
         lists,
         cards,
+        members,
+        users,
         onBack,
         onAddCard,
         onDeleteCard,
@@ -58,8 +59,42 @@ export class AppView {
         onMoveCard,
         onAddList,
         onEditList,
-        onDeleteList
+        onDeleteList,
+        onAddMember,
+        onRemoveMember
     ) {
+        const membersHtml = members
+            .map(member => `
+                <div class="member">
+                    <strong>${member.name}</strong>
+                    <span>${member.email}</span>
+
+                    <button
+                        class="remove-member-button"
+                        data-user-id="${member.id}"
+                    >
+                        Rimuovi
+                    </button>
+                </div>
+            `)
+            .join('');
+
+        const memberIds = members.map(
+            member => Number(member.id)
+        );
+
+        const availableUsers = users.filter(
+            user => !memberIds.includes(Number(user.id))
+        );
+
+        const userOptions = availableUsers
+            .map(user => `
+                <option value="${user.id}">
+                    ${user.name} - ${user.email}
+                </option>
+            `)
+            .join('');
+
         const listsHtml = lists
             .map(list => {
                 const listCards = cards.filter(
@@ -162,6 +197,28 @@ export class AppView {
             </button>
 
             <h2>${board.name}</h2>
+
+            <section class="board-members">
+                <h3>Membri della board</h3>
+
+                <div class="members">
+                    ${membersHtml}
+                </div>
+
+                <div class="add-member-container">
+                    <select id="member-select">
+                        <option value="">
+                            Seleziona un utente
+                        </option>
+
+                        ${userOptions}
+                    </select>
+
+                    <button id="add-member-button">
+                        Aggiungi membro
+                    </button>
+                </div>
+            </section>
 
             <div class="lists">
                 ${listsHtml}
@@ -386,6 +443,37 @@ export class AppView {
                 const listId = button.dataset.listId;
 
                 onDeleteList(listId);
+            });
+        });
+
+        const addMemberButton = document.getElementById(
+            'add-member-button'
+        );
+
+        addMemberButton.addEventListener('click', () => {
+            const select = document.getElementById(
+                'member-select'
+            );
+
+            const userId = select.value;
+
+            if (userId === '') {
+                alert('Seleziona un utente');
+                return;
+            }
+
+            onAddMember(userId);
+        });
+
+        const removeMemberButtons = document.querySelectorAll(
+            '.remove-member-button'
+        );
+
+        removeMemberButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                const userId = button.dataset.userId;
+
+                onRemoveMember(userId);
             });
         });
     }

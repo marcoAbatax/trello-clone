@@ -203,4 +203,72 @@ async deleteList(listId) {
 
     return await response.json();
 }
+
+async getBoardMembers(boardId) {
+    const response = await fetch(
+        `${this.baseUrl}/boards/${boardId}/members`
+    );
+
+    if (!response.ok) {
+        throw new Error(
+            'Errore durante il caricamento dei membri della board'
+        );
+    }
+
+    return await response.json();
+}
+
+async addBoardMember(boardId, userId) {
+    const response = await fetch(
+        `${this.baseUrl}/boards/${boardId}/members`,
+        {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                user_id: userId
+            })
+        }
+    );
+
+    if (!response.ok) {
+        throw new Error(
+            'Errore durante l\'aggiunta del membro'
+        );
+    }
+
+    return await response.json();
+}
+
+async removeBoardMember(boardId, userId) {
+    const response = await fetch(
+        `${this.baseUrl}/boards/${boardId}/members/${userId}`,
+        {
+            method: 'DELETE'
+        }
+    );
+
+    if (!response.ok) {
+        throw new Error(
+            'Errore durante la rimozione del membro'
+        );
+    }
+
+    return await response.json();
+}
+
+async getUsers() {
+    const response = await fetch(
+        `${this.baseUrl}/users`
+    );
+
+    if (!response.ok) {
+        throw new Error(
+            'Errore durante il caricamento degli utenti'
+        );
+    }
+
+    return await response.json();
+}
 }

@@ -99,3 +99,27 @@ main {
 .add-card-button:hover {
     background-color: #ff0000;
 }
+
+.board-members {
+    margin: 20px 0;
+}
+
+.members {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.member {
+    display: flex;
+    flex-direction: column;
+    padding: 10px 14px;
+    background-color: white;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+}
+
+.member span {
+    margin-top: 4px;
+    font-size: 12px;
+}
