@@ -191,6 +191,15 @@ export class AppView {
             .querySelectorAll('.delete-board-button')
             .forEach(button => {
                 button.addEventListener('click', () => {
+
+                    const confirmed = confirm(
+                        'Sei sicuro di voler eliminare questa board? Verranno eliminate anche le liste e le card contenute.'
+                    );
+
+                    if (!confirmed) {
+                        return;
+                    }
+
                     onDeleteBoard(
                         button.dataset.boardId
                     );
@@ -258,6 +267,15 @@ export class AppView {
             .querySelectorAll('.delete-user-button')
             .forEach(button => {
                 button.addEventListener('click', () => {
+
+                    const confirmed = confirm(
+                        'Sei sicuro di voler eliminare questo utente?'
+                    );
+
+                    if (!confirmed) {
+                        return;
+                    }
+
                     onDeleteUser(
                         button.dataset.userId
                     );
@@ -289,6 +307,7 @@ export class AppView {
             .map(member => `
                 <div class="member">
                     <strong>${member.name}</strong>
+
                     <span>${member.email}</span>
 
                     <button
@@ -322,6 +341,7 @@ export class AppView {
 
         const listsHtml = lists
             .map(list => {
+
                 const listCards = cards
                     .filter(
                         card =>
@@ -335,6 +355,7 @@ export class AppView {
 
                 const cardsHtml = listCards
                     .map(card => {
+
                         const cardAssignments =
                             assignments[card.id] ?? [];
 
@@ -356,6 +377,7 @@ export class AppView {
                             cardAssignments
                                 .map(user => `
                                     <div class="card-assignment">
+
                                         <span>
                                             ${user.name}
                                         </span>
@@ -367,6 +389,7 @@ export class AppView {
                                         >
                                             ×
                                         </button>
+
                                     </div>
                                 `)
                                 .join('');
@@ -386,7 +409,9 @@ export class AppView {
                                 draggable="true"
                                 data-card-id="${card.id}"
                             >
-                                <h4>${card.title}</h4>
+                                <h4>
+                                    ${card.title}
+                                </h4>
 
                                 <p>
                                     ${card.description ?? ''}
@@ -397,6 +422,7 @@ export class AppView {
                                 </div>
 
                                 <div class="assignment-controls">
+
                                     <select
                                         class="assignment-select"
                                         data-card-id="${card.id}"
@@ -414,6 +440,7 @@ export class AppView {
                                     >
                                         Assegna
                                     </button>
+
                                 </div>
 
                                 <button
@@ -439,7 +466,9 @@ export class AppView {
                         class="list"
                         data-list-id="${list.id}"
                     >
-                        <h3>${list.title}</h3>
+                        <h3>
+                            ${list.title}
+                        </h3>
 
                         <button
                             class="edit-list-button"
@@ -499,10 +528,14 @@ export class AppView {
                 ← Torna alle board
             </button>
 
-            <h2>${board.name}</h2>
+            <h2>
+                ${board.name}
+            </h2>
 
             <section class="board-members">
-                <h3>Membri della board</h3>
+                <h3>
+                    Membri della board
+                </h3>
 
                 <div class="members">
                     ${membersHtml}
@@ -559,6 +592,7 @@ export class AppView {
             .querySelectorAll('.add-card-button')
             .forEach(button => {
                 button.addEventListener('click', () => {
+
                     const listId =
                         button.dataset.listId;
 
@@ -576,6 +610,7 @@ export class AppView {
             .querySelectorAll('.save-card-button')
             .forEach(button => {
                 button.addEventListener('click', () => {
+
                     const listId =
                         button.dataset.listId;
 
@@ -609,7 +644,17 @@ export class AppView {
         document
             .querySelectorAll('.delete-card-button')
             .forEach(button => {
+
                 button.addEventListener('click', () => {
+
+                    const confirmed = confirm(
+                        'Sei sicuro di voler eliminare questa card?'
+                    );
+
+                    if (!confirmed) {
+                        return;
+                    }
+
                     onDeleteCard(
                         button.dataset.cardId
                     );
@@ -619,7 +664,9 @@ export class AppView {
         document
             .querySelectorAll('.edit-card-button')
             .forEach(button => {
+
                 button.addEventListener('click', () => {
+
                     const cardId =
                         button.dataset.cardId;
 
@@ -781,14 +828,19 @@ export class AppView {
         document
             .getElementById('add-list-button')
             .addEventListener('click', () => {
+
                 document
-                    .getElementById('add-list-form')
-                    .style.display = 'block';
+                    .getElementById(
+                        'add-list-form'
+                    )
+                    .style.display =
+                        'block';
             });
 
         document
             .getElementById('save-list-button')
             .addEventListener('click', () => {
+
                 const title =
                     document
                         .getElementById(
@@ -802,7 +854,9 @@ export class AppView {
         document
             .querySelectorAll('.edit-list-button')
             .forEach(button => {
+
                 button.addEventListener('click', () => {
+
                     const listId =
                         button.dataset.listId;
 
@@ -831,7 +885,17 @@ export class AppView {
         document
             .querySelectorAll('.delete-list-button')
             .forEach(button => {
+
                 button.addEventListener('click', () => {
+
+                    const confirmed = confirm(
+                        'Sei sicuro di voler eliminare questa lista e tutte le sue card?'
+                    );
+
+                    if (!confirmed) {
+                        return;
+                    }
+
                     onDeleteList(
                         button.dataset.listId
                     );
@@ -841,6 +905,7 @@ export class AppView {
         document
             .getElementById('add-member-button')
             .addEventListener('click', () => {
+
                 const select =
                     document.getElementById(
                         'member-select'
@@ -853,10 +918,13 @@ export class AppView {
                     alert(
                         'Seleziona un utente'
                     );
+
                     return;
                 }
 
-                onAddMember(userId);
+                onAddMember(
+                    userId
+                );
             });
 
         document
@@ -864,9 +932,11 @@ export class AppView {
                 '.remove-member-button'
             )
             .forEach(button => {
+
                 button.addEventListener(
                     'click',
                     () => {
+
                         onRemoveMember(
                             button.dataset.userId
                         );
@@ -879,9 +949,11 @@ export class AppView {
                 '.add-assignment-button'
             )
             .forEach(button => {
+
                 button.addEventListener(
                     'click',
                     () => {
+
                         const cardId =
                             button.dataset.cardId;
 
@@ -897,6 +969,7 @@ export class AppView {
                             alert(
                                 'Seleziona un membro da assegnare'
                             );
+
                             return;
                         }
 
@@ -913,9 +986,11 @@ export class AppView {
                 '.remove-assignment-button'
             )
             .forEach(button => {
+
                 button.addEventListener(
                     'click',
                     () => {
+
                         onRemoveAssignment(
                             button.dataset.cardId,
                             button.dataset.userId
@@ -927,7 +1002,9 @@ export class AppView {
 
     showError(message) {
         this.app.innerHTML = `
-            <p>Errore: ${message}</p>
+            <p>
+                Errore: ${message}
+            </p>
         `;
     }
 }
