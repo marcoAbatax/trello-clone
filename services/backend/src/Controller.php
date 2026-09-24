@@ -186,6 +186,16 @@ class Controller
             return;
         }
 
+        // CARD MOVE
+
+        if (
+            $method === 'PUT' &&
+            preg_match('#^/cards/(\d+)/move$#', $path, $matches)
+        ) {
+            $this->moveCard((int) $matches[1]);
+            return;
+        }
+
         // CARDS
 
         if ($method === 'GET' && $path === '/cards') {
@@ -271,7 +281,10 @@ class Controller
         );
 
         http_response_code(201);
-        echo json_encode(['id' => $id]);
+
+        echo json_encode([
+            'id' => $id
+        ]);
     }
 
     private function updateUser(int $id): void
@@ -358,7 +371,10 @@ class Controller
         );
 
         http_response_code(201);
-        echo json_encode(['id' => $id]);
+
+        echo json_encode([
+            'id' => $id
+        ]);
     }
 
     private function updateBoard(int $id): void
@@ -402,11 +418,11 @@ class Controller
 
     private function getBoardMembers(int $boardId): void
     {
-        $board = $this->boardGateway->findById($boardId);
-
-        if (!$board) {
+        if (!$this->boardGateway->findById($boardId)) {
             http_response_code(404);
-            echo json_encode(['error' => 'Board non trovata']);
+            echo json_encode([
+                'error' => 'Board non trovata'
+            ]);
             return;
         }
 
@@ -419,7 +435,9 @@ class Controller
     {
         if (!$this->boardGateway->findById($boardId)) {
             http_response_code(404);
-            echo json_encode(['error' => 'Board non trovata']);
+            echo json_encode([
+                'error' => 'Board non trovata'
+            ]);
             return;
         }
 
@@ -443,7 +461,9 @@ class Controller
 
         if (!$this->userGateway->findById($userId)) {
             http_response_code(404);
-            echo json_encode(['error' => 'Utente non trovato']);
+            echo json_encode([
+                'error' => 'Utente non trovato'
+            ]);
             return;
         }
 
@@ -473,7 +493,9 @@ class Controller
     ): void {
         if (!$this->boardGateway->findById($boardId)) {
             http_response_code(404);
-            echo json_encode(['error' => 'Board non trovata']);
+            echo json_encode([
+                'error' => 'Board non trovata'
+            ]);
             return;
         }
 
@@ -510,7 +532,9 @@ class Controller
 
         if (!$list) {
             http_response_code(404);
-            echo json_encode(['error' => 'Lista non trovata']);
+            echo json_encode([
+                'error' => 'Lista non trovata'
+            ]);
             return;
         }
 
@@ -544,7 +568,10 @@ class Controller
         );
 
         http_response_code(201);
-        echo json_encode(['id' => $id]);
+
+        echo json_encode([
+            'id' => $id
+        ]);
     }
 
     private function updateList(int $id): void
@@ -601,7 +628,9 @@ class Controller
 
         if (!$card) {
             http_response_code(404);
-            echo json_encode(['error' => 'Card non trovata']);
+            echo json_encode([
+                'error' => 'Card non trovata'
+            ]);
             return;
         }
 
@@ -638,7 +667,10 @@ class Controller
         );
 
         http_response_code(201);
-        echo json_encode(['id' => $id]);
+
+        echo json_encode([
+            'id' => $id
+        ]);
     }
 
     private function updateCard(int $id): void
@@ -683,6 +715,77 @@ class Controller
         ]);
     }
 
+    // CARD MOVE
+
+    private function moveCard(int $cardId): void
+    {
+        $card = $this->cardGateway->findById($cardId);
+
+        if (!$card) {
+            http_response_code(404);
+
+            echo json_encode([
+                'error' => 'Card non trovata'
+            ]);
+
+            return;
+        }
+
+        $data = json_decode(
+            file_get_contents('php://input'),
+            true
+        );
+
+        if (
+            !is_array($data) ||
+            !isset($data['list_id']) ||
+            !isset($data['position'])
+        ) {
+            http_response_code(400);
+
+            echo json_encode([
+                'error' => 'list_id e position sono obbligatori'
+            ]);
+
+            return;
+        }
+
+        $listId = (int) $data['list_id'];
+        $position = (int) $data['position'];
+
+        $list = $this->boardListGateway->findById($listId);
+
+        if (!$list) {
+            http_response_code(404);
+
+            echo json_encode([
+                'error' => 'Lista di destinazione non trovata'
+            ]);
+
+            return;
+        }
+
+        if ($position < 1) {
+            http_response_code(400);
+
+            echo json_encode([
+                'error' => 'position deve essere maggiore o uguale a 1'
+            ]);
+
+            return;
+        }
+
+        $this->cardGateway->move(
+            $cardId,
+            $listId,
+            $position
+        );
+
+        echo json_encode([
+            'message' => 'Card spostata'
+        ]);
+    }
+
     // CARD ASSIGNMENTS
 
     private function getCardAssignments(int $cardId): void
@@ -691,7 +794,9 @@ class Controller
 
         if (!$card) {
             http_response_code(404);
-            echo json_encode(['error' => 'Card non trovata']);
+            echo json_encode([
+                'error' => 'Card non trovata'
+            ]);
             return;
         }
 
@@ -706,7 +811,9 @@ class Controller
 
         if (!$card) {
             http_response_code(404);
-            echo json_encode(['error' => 'Card non trovata']);
+            echo json_encode([
+                'error' => 'Card non trovata'
+            ]);
             return;
         }
 
@@ -730,7 +837,9 @@ class Controller
 
         if (!$this->userGateway->findById($userId)) {
             http_response_code(404);
-            echo json_encode(['error' => 'Utente non trovato']);
+            echo json_encode([
+                'error' => 'Utente non trovato'
+            ]);
             return;
         }
 
@@ -793,7 +902,11 @@ class Controller
 
         if (!$card) {
             http_response_code(404);
-            echo json_encode(['error' => 'Card non trovata']);
+
+            echo json_encode([
+                'error' => 'Card non trovata'
+            ]);
+
             return;
         }
 

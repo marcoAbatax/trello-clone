@@ -42,8 +42,18 @@ class CardGateway
         int $position
     ): int {
         $statement = $this->connection->prepare(
-            "INSERT INTO cards (list_id, title, description, position)
-             VALUES (:list_id, :title, :description, :position)"
+            "INSERT INTO cards (
+                list_id,
+                title,
+                description,
+                position
+             )
+             VALUES (
+                :list_id,
+                :title,
+                :description,
+                :position
+             )"
         );
 
         $statement->execute([
@@ -74,6 +84,25 @@ class CardGateway
             'id' => $id,
             'title' => $title,
             'description' => $description,
+            'position' => $position
+        ]);
+    }
+
+    public function move(
+        int $id,
+        int $listId,
+        int $position
+    ): bool {
+        $statement = $this->connection->prepare(
+            "UPDATE cards
+             SET list_id = :list_id,
+                 position = :position
+             WHERE id = :id"
+        );
+
+        return $statement->execute([
+            'id' => $id,
+            'list_id' => $listId,
             'position' => $position
         ]);
     }
