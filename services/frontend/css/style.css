@@ -1,0 +1,101 @@
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background-color: #f4f5f7;
+}
+
+header {
+    padding: 16px 24px;
+    background-color: white;
+    border-bottom: 1px solid #ddd;
+}
+
+header h1 {
+    margin: 0;
+}
+
+main {
+    padding: 24px;
+}
+
+#app {
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.boards {
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+}
+
+.board {
+    width: 250px;
+    padding: 20px;
+    background-color: white;
+    border-radius: 8px;
+    border: 1px solid #ddd;
+}
+
+.board h2 {
+    margin-top: 0;
+}
+
+.lists {
+    display: flex;
+    gap: 20px;
+    align-items: flex-start;
+    overflow-x: auto;
+}
+
+.list {
+    width: 280px;
+    min-width: 280px;
+    padding: 16px;
+    background-color: #ebecf0;
+    border-radius: 8px;
+}
+
+.list h3 {
+    margin-top: 0;
+}
+
+.cards {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.card {
+    padding: 12px;
+    background-color: white;
+    border-radius: 6px;
+    border: 1px solid #ddd;
+}
+
+.card h4 {
+    margin: 0 0 8px 0;
+}
+
+.card p {
+    margin: 0;
+}
+
+.add-card-button {
+    width: 100%;
+    margin-top: 12px;
+    padding: 10px;
+    border: none;
+    background: transparent;
+    text-align: left;
+    cursor: pointer;
+    border-radius: 6px;
+}
+
+.add-card-button:hover {
+    background-color: #ff0000;
+}

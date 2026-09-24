@@ -2,16 +2,13 @@ services:
   database:
     image: mysql:8.4
     container_name: trello-db
-
     environment:
       MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
       MYSQL_DATABASE: ${MYSQL_DATABASE}
       MYSQL_USER: ${MYSQL_USER}
       MYSQL_PASSWORD: ${MYSQL_PASSWORD}
-
     ports:
       - "3306:3306"
-
     volumes:
       - mysql_data:/var/lib/mysql
       - ./services/database:/docker-entrypoint-initdb.d:ro
@@ -19,20 +16,25 @@ services:
   backend:
     build:
       context: ./services/backend
-
     container_name: trello-backend
-
     ports:
       - "8080:80"
-
     environment:
       DB_HOST: database
       DB_NAME: ${MYSQL_DATABASE}
       DB_USER: ${MYSQL_USER}
       DB_PASSWORD: ${MYSQL_PASSWORD}
-
     depends_on:
       - database
+
+  frontend:
+    build:
+      context: ./services/frontend
+    container_name: trello-frontend
+    ports:
+      - "3000:80"
+    depends_on:
+      - backend
 
 volumes:
   mysql_data:
