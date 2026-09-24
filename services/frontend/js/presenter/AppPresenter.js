@@ -21,30 +21,60 @@ class AppPresenter {
         }
     }
 
-    showBoards() {
-        this.view.showBoards(
+    async showBoards() {
+        try {
+            const users = await this.model.getUsers();
 
-            this.boards,
+            this.view.showBoards(
+                this.boards,
+                users,
 
-            async boardId => {
-                await this.openBoard(boardId);
-            },
+                async boardId => {
+                    await this.openBoard(boardId);
+                },
 
-            async name => {
-                await this.createBoard(name);
-            },
+                async name => {
+                    await this.createBoard(name);
+                },
 
-            async (boardId, name) => {
-                await this.updateBoard(
-                    boardId,
-                    name
-                );
-            },
+                async (boardId, name) => {
+                    await this.updateBoard(
+                        boardId,
+                        name
+                    );
+                },
 
-            async boardId => {
-                await this.deleteBoard(boardId);
-            }
-        );
+                async boardId => {
+                    await this.deleteBoard(boardId);
+                },
+
+                async (name, email) => {
+                    await this.createUser(
+                        name,
+                        email
+                    );
+                },
+
+                async (
+                    userId,
+                    name,
+                    email
+                ) => {
+                    await this.updateUser(
+                        userId,
+                        name,
+                        email
+                    );
+                },
+
+                async userId => {
+                    await this.deleteUser(userId);
+                }
+            );
+
+        } catch (error) {
+            this.view.showError(error.message);
+        }
     }
 
     async createBoard(name) {
@@ -59,7 +89,7 @@ class AppPresenter {
             this.boards =
                 await this.model.getBoards();
 
-            this.showBoards();
+            await this.showBoards();
 
         } catch (error) {
             this.view.showError(error.message);
@@ -86,7 +116,7 @@ class AppPresenter {
             this.boards =
                 await this.model.getBoards();
 
-            this.showBoards();
+            await this.showBoards();
 
         } catch (error) {
             this.view.showError(error.message);
@@ -102,7 +132,76 @@ class AppPresenter {
             this.boards =
                 await this.model.getBoards();
 
-            this.showBoards();
+            await this.showBoards();
+
+        } catch (error) {
+            this.view.showError(error.message);
+        }
+    }
+
+    async createUser(
+        name,
+        email
+    ) {
+        try {
+            if (
+                name.trim() === '' ||
+                email.trim() === ''
+            ) {
+                alert(
+                    'Nome ed email sono obbligatori'
+                );
+                return;
+            }
+
+            await this.model.createUser(
+                name,
+                email
+            );
+
+            await this.showBoards();
+
+        } catch (error) {
+            this.view.showError(error.message);
+        }
+    }
+
+    async updateUser(
+        userId,
+        name,
+        email
+    ) {
+        try {
+            if (
+                name.trim() === '' ||
+                email.trim() === ''
+            ) {
+                alert(
+                    'Nome ed email sono obbligatori'
+                );
+                return;
+            }
+
+            await this.model.updateUser(
+                Number(userId),
+                name,
+                email
+            );
+
+            await this.showBoards();
+
+        } catch (error) {
+            this.view.showError(error.message);
+        }
+    }
+
+    async deleteUser(userId) {
+        try {
+            await this.model.deleteUser(
+                Number(userId)
+            );
+
+            await this.showBoards();
 
         } catch (error) {
             this.view.showError(error.message);

@@ -12,10 +12,14 @@ export class AppView {
 
     showBoards(
         boards,
+        users,
         onBoardClick,
         onCreateBoard,
         onUpdateBoard,
-        onDeleteBoard
+        onDeleteBoard,
+        onCreateUser,
+        onUpdateUser,
+        onDeleteUser
     ) {
         const boardsHtml = boards
             .map(board => `
@@ -51,6 +55,33 @@ export class AppView {
             `)
             .join('');
 
+        const usersHtml = users
+            .map(user => `
+                <div
+                    class="user"
+                    data-user-id="${user.id}"
+                >
+                    <strong>${user.name}</strong>
+
+                    <span>${user.email}</span>
+
+                    <button
+                        class="edit-user-button"
+                        data-user-id="${user.id}"
+                    >
+                        Modifica
+                    </button>
+
+                    <button
+                        class="delete-user-button"
+                        data-user-id="${user.id}"
+                    >
+                        Elimina
+                    </button>
+                </div>
+            `)
+            .join('');
+
         this.app.innerHTML = `
             <h2>Le board</h2>
 
@@ -73,6 +104,38 @@ export class AppView {
                         : boardsHtml
                 }
             </div>
+
+            <hr>
+
+            <section class="users-section">
+                <h2>Utenti</h2>
+
+                <div class="create-user-container">
+                    <input
+                        type="text"
+                        id="user-name-input"
+                        placeholder="Nome utente"
+                    >
+
+                    <input
+                        type="email"
+                        id="user-email-input"
+                        placeholder="Email utente"
+                    >
+
+                    <button id="create-user-button">
+                        Crea utente
+                    </button>
+                </div>
+
+                <div class="users">
+                    ${
+                        users.length === 0
+                            ? '<p>Nessun utente disponibile.</p>'
+                            : usersHtml
+                    }
+                </div>
+            </section>
         `;
 
         document
@@ -128,10 +191,76 @@ export class AppView {
             .querySelectorAll('.delete-board-button')
             .forEach(button => {
                 button.addEventListener('click', () => {
-                    const boardId =
-                        button.dataset.boardId;
+                    onDeleteBoard(
+                        button.dataset.boardId
+                    );
+                });
+            });
 
-                    onDeleteBoard(boardId);
+        document
+            .getElementById('create-user-button')
+            .addEventListener('click', () => {
+                const name =
+                    document.getElementById(
+                        'user-name-input'
+                    ).value;
+
+                const email =
+                    document.getElementById(
+                        'user-email-input'
+                    ).value;
+
+                onCreateUser(
+                    name,
+                    email
+                );
+            });
+
+        document
+            .querySelectorAll('.edit-user-button')
+            .forEach(button => {
+                button.addEventListener('click', () => {
+                    const userId =
+                        button.dataset.userId;
+
+                    const user = users.find(
+                        user =>
+                            user.id == userId
+                    );
+
+                    const newName = prompt(
+                        'Nuovo nome utente:',
+                        user.name
+                    );
+
+                    if (newName === null) {
+                        return;
+                    }
+
+                    const newEmail = prompt(
+                        'Nuova email:',
+                        user.email
+                    );
+
+                    if (newEmail === null) {
+                        return;
+                    }
+
+                    onUpdateUser(
+                        userId,
+                        newName,
+                        newEmail
+                    );
+                });
+            });
+
+        document
+            .querySelectorAll('.delete-user-button')
+            .forEach(button => {
+                button.addEventListener('click', () => {
+                    onDeleteUser(
+                        button.dataset.userId
+                    );
                 });
             });
     }

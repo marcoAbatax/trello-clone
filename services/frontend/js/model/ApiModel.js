@@ -388,4 +388,69 @@ async deleteBoard(boardId) {
 
     return await response.json();
 }
+
+async createUser(name, email) {
+    const response = await fetch(
+        `${this.baseUrl}/users`,
+        {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                name: name,
+                email: email
+            })
+        }
+    );
+
+    if (!response.ok) {
+        throw new Error(
+            'Errore durante la creazione dell\'utente'
+        );
+    }
+
+    return await response.json();
+}
+
+async updateUser(userId, name, email) {
+    const response = await fetch(
+        `${this.baseUrl}/users/${userId}`,
+        {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                name: name,
+                email: email
+            })
+        }
+    );
+
+    if (!response.ok) {
+        throw new Error(
+            'Errore durante la modifica dell\'utente'
+        );
+    }
+
+    return await response.json();
+}
+
+async deleteUser(userId) {
+    const response = await fetch(
+        `${this.baseUrl}/users/${userId}`,
+        {
+            method: 'DELETE'
+        }
+    );
+
+    if (!response.ok) {
+        throw new Error(
+            'Errore durante l\'eliminazione dell\'utente'
+        );
+    }
+
+    return await response.json();
+}
 }
