@@ -10,19 +10,43 @@ export class AppView {
         `;
     }
 
-    showBoards(boards, onBoardClick) {
-        if (boards.length === 0) {
-            this.app.innerHTML = `
-                <p>Nessuna board disponibile.</p>
-            `;
-            return;
-        }
-
+    showBoards(
+        boards,
+        onBoardClick,
+        onCreateBoard,
+        onUpdateBoard,
+        onDeleteBoard
+    ) {
         const boardsHtml = boards
             .map(board => `
-                <div class="board" data-board-id="${board.id}">
+                <div
+                    class="board"
+                    data-board-id="${board.id}"
+                >
                     <h2>${board.name}</h2>
+
                     <p>ID: ${board.id}</p>
+
+                    <button
+                        class="open-board-button"
+                        data-board-id="${board.id}"
+                    >
+                        Apri
+                    </button>
+
+                    <button
+                        class="edit-board-button"
+                        data-board-id="${board.id}"
+                    >
+                        Modifica
+                    </button>
+
+                    <button
+                        class="delete-board-button"
+                        data-board-id="${board.id}"
+                    >
+                        Elimina
+                    </button>
                 </div>
             `)
             .join('');
@@ -30,18 +54,84 @@ export class AppView {
         this.app.innerHTML = `
             <h2>Le board</h2>
 
+            <div class="create-board-container">
+                <input
+                    type="text"
+                    id="board-name-input"
+                    placeholder="Nome nuova board"
+                >
+
+                <button id="create-board-button">
+                    Crea board
+                </button>
+            </div>
+
             <div class="boards">
-                ${boardsHtml}
+                ${
+                    boards.length === 0
+                        ? '<p>Nessuna board disponibile.</p>'
+                        : boardsHtml
+                }
             </div>
         `;
 
         document
-            .querySelectorAll('.board')
-            .forEach(boardElement => {
-                boardElement.addEventListener('click', () => {
-                    onBoardClick(
-                        boardElement.dataset.boardId
+            .getElementById('create-board-button')
+            .addEventListener('click', () => {
+                const input =
+                    document.getElementById(
+                        'board-name-input'
                     );
+
+                onCreateBoard(input.value);
+            });
+
+        document
+            .querySelectorAll('.open-board-button')
+            .forEach(button => {
+                button.addEventListener('click', () => {
+                    onBoardClick(
+                        button.dataset.boardId
+                    );
+                });
+            });
+
+        document
+            .querySelectorAll('.edit-board-button')
+            .forEach(button => {
+                button.addEventListener('click', () => {
+                    const boardId =
+                        button.dataset.boardId;
+
+                    const board = boards.find(
+                        board =>
+                            board.id == boardId
+                    );
+
+                    const newName = prompt(
+                        'Nuovo nome della board:',
+                        board.name
+                    );
+
+                    if (newName === null) {
+                        return;
+                    }
+
+                    onUpdateBoard(
+                        boardId,
+                        newName
+                    );
+                });
+            });
+
+        document
+            .querySelectorAll('.delete-board-button')
+            .forEach(button => {
+                button.addEventListener('click', () => {
+                    const boardId =
+                        button.dataset.boardId;
+
+                    onDeleteBoard(boardId);
                 });
             });
     }
@@ -87,7 +177,10 @@ export class AppView {
         );
 
         const availableUsers = users.filter(
-            user => !memberIds.includes(Number(user.id))
+            user =>
+                !memberIds.includes(
+                    Number(user.id)
+                )
         );
 
         const userOptions = availableUsers
@@ -102,7 +195,8 @@ export class AppView {
             .map(list => {
                 const listCards = cards
                     .filter(
-                        card => card.list_id == list.id
+                        card =>
+                            card.list_id == list.id
                     )
                     .sort(
                         (a, b) =>
@@ -117,7 +211,8 @@ export class AppView {
 
                         const assignedUserIds =
                             cardAssignments.map(
-                                user => Number(user.id)
+                                user =>
+                                    Number(user.id)
                             );
 
                         const availableMembers =
@@ -335,13 +430,16 @@ export class AppView {
             .querySelectorAll('.add-card-button')
             .forEach(button => {
                 button.addEventListener('click', () => {
-                    const listId = button.dataset.listId;
+                    const listId =
+                        button.dataset.listId;
 
-                    const form = document.querySelector(
-                        `[data-form-list-id="${listId}"]`
-                    );
+                    const form =
+                        document.querySelector(
+                            `[data-form-list-id="${listId}"]`
+                        );
 
-                    form.style.display = 'block';
+                    form.style.display =
+                        'block';
                 });
             });
 
@@ -349,19 +447,27 @@ export class AppView {
             .querySelectorAll('.save-card-button')
             .forEach(button => {
                 button.addEventListener('click', () => {
-                    const listId = button.dataset.listId;
+                    const listId =
+                        button.dataset.listId;
 
-                    const form = document.querySelector(
-                        `[data-form-list-id="${listId}"]`
-                    );
+                    const form =
+                        document.querySelector(
+                            `[data-form-list-id="${listId}"]`
+                        );
 
-                    const title = form
-                        .querySelector('.card-title-input')
-                        .value;
+                    const title =
+                        form
+                            .querySelector(
+                                '.card-title-input'
+                            )
+                            .value;
 
-                    const description = form
-                        .querySelector('.card-description-input')
-                        .value;
+                    const description =
+                        form
+                            .querySelector(
+                                '.card-description-input'
+                            )
+                            .value;
 
                     onAddCard(
                         listId,
@@ -389,7 +495,8 @@ export class AppView {
                         button.dataset.cardId;
 
                     const card = cards.find(
-                        card => card.id == cardId
+                        card =>
+                            card.id == cardId
                     );
 
                     const newTitle = prompt(
@@ -553,9 +660,12 @@ export class AppView {
         document
             .getElementById('save-list-button')
             .addEventListener('click', () => {
-                const title = document
-                    .getElementById('list-title-input')
-                    .value;
+                const title =
+                    document
+                        .getElementById(
+                            'list-title-input'
+                        )
+                        .value;
 
                 onAddList(title);
             });
@@ -568,7 +678,8 @@ export class AppView {
                         button.dataset.listId;
 
                     const list = lists.find(
-                        list => list.id == listId
+                        list =>
+                            list.id == listId
                     );
 
                     const newTitle = prompt(

@@ -325,4 +325,67 @@ async removeCardAssignment(cardId, userId) {
 
     return await response.json();
 }
+
+async createBoard(name) {
+    const response = await fetch(
+        `${this.baseUrl}/boards`,
+        {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                name: name
+            })
+        }
+    );
+
+    if (!response.ok) {
+        throw new Error(
+            'Errore durante la creazione della board'
+        );
+    }
+
+    return await response.json();
+}
+
+async updateBoard(boardId, name) {
+    const response = await fetch(
+        `${this.baseUrl}/boards/${boardId}`,
+        {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                name: name
+            })
+        }
+    );
+
+    if (!response.ok) {
+        throw new Error(
+            'Errore durante la modifica della board'
+        );
+    }
+
+    return await response.json();
+}
+
+async deleteBoard(boardId) {
+    const response = await fetch(
+        `${this.baseUrl}/boards/${boardId}`,
+        {
+            method: 'DELETE'
+        }
+    );
+
+    if (!response.ok) {
+        throw new Error(
+            'Errore durante l\'eliminazione della board'
+        );
+    }
+
+    return await response.json();
+}
 }

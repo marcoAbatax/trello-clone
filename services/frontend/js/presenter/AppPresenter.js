@@ -6,7 +6,6 @@ class AppPresenter {
     constructor(model, view) {
         this.model = model;
         this.view = view;
-
         this.boards = [];
     }
 
@@ -24,25 +23,115 @@ class AppPresenter {
 
     showBoards() {
         this.view.showBoards(
+
             this.boards,
+
             async boardId => {
                 await this.openBoard(boardId);
+            },
+
+            async name => {
+                await this.createBoard(name);
+            },
+
+            async (boardId, name) => {
+                await this.updateBoard(
+                    boardId,
+                    name
+                );
+            },
+
+            async boardId => {
+                await this.deleteBoard(boardId);
             }
         );
     }
 
+    async createBoard(name) {
+        try {
+            if (name.trim() === '') {
+                alert('Inserisci un nome per la board');
+                return;
+            }
+
+            await this.model.createBoard(name);
+
+            this.boards =
+                await this.model.getBoards();
+
+            this.showBoards();
+
+        } catch (error) {
+            this.view.showError(error.message);
+        }
+    }
+
+    async updateBoard(
+        boardId,
+        name
+    ) {
+        try {
+            if (name.trim() === '') {
+                alert(
+                    'Il nome della board non può essere vuoto'
+                );
+                return;
+            }
+
+            await this.model.updateBoard(
+                Number(boardId),
+                name
+            );
+
+            this.boards =
+                await this.model.getBoards();
+
+            this.showBoards();
+
+        } catch (error) {
+            this.view.showError(error.message);
+        }
+    }
+
+    async deleteBoard(boardId) {
+        try {
+            await this.model.deleteBoard(
+                Number(boardId)
+            );
+
+            this.boards =
+                await this.model.getBoards();
+
+            this.showBoards();
+
+        } catch (error) {
+            this.view.showError(error.message);
+        }
+    }
+
     async openBoard(boardId) {
         try {
-            const lists = await this.model.getLists();
-            const cards = await this.model.getCards();
-            const members = await this.model.getBoardMembers(boardId);
-            const users = await this.model.getUsers();
+            const lists =
+                await this.model.getLists();
+
+            const cards =
+                await this.model.getCards();
+
+            const members =
+                await this.model.getBoardMembers(
+                    boardId
+                );
+
+            const users =
+                await this.model.getUsers();
 
             const assignments = {};
 
             for (const card of cards) {
                 assignments[card.id] =
-                    await this.model.getCardAssignments(card.id);
+                    await this.model.getCardAssignments(
+                        card.id
+                    );
             }
 
             const boardLists = lists.filter(
@@ -65,7 +154,11 @@ class AppPresenter {
                     this.showBoards();
                 },
 
-                async (listId, title, description) => {
+                async (
+                    listId,
+                    title,
+                    description
+                ) => {
                     await this.addCard(
                         boardId,
                         listId,
@@ -186,17 +279,21 @@ class AppPresenter {
     ) {
         try {
             if (title.trim() === '') {
-                alert('Inserisci un titolo per la card');
+                alert(
+                    'Inserisci un titolo per la card'
+                );
                 return;
             }
 
-            const cards = await this.model.getCards();
+            const cards =
+                await this.model.getCards();
 
             const cardsInList = cards.filter(
                 card => card.list_id == listId
             );
 
-            const position = cardsInList.length + 1;
+            const position =
+                cardsInList.length + 1;
 
             await this.model.createCard(
                 Number(listId),
@@ -237,7 +334,9 @@ class AppPresenter {
     ) {
         try {
             if (title.trim() === '') {
-                alert('Il titolo non può essere vuoto');
+                alert(
+                    'Il titolo non può essere vuoto'
+                );
                 return;
             }
 
@@ -281,17 +380,21 @@ class AppPresenter {
     ) {
         try {
             if (title.trim() === '') {
-                alert('Inserisci un titolo per la lista');
+                alert(
+                    'Inserisci un titolo per la lista'
+                );
                 return;
             }
 
-            const lists = await this.model.getLists();
+            const lists =
+                await this.model.getLists();
 
             const boardLists = lists.filter(
                 list => list.board_id == boardId
             );
 
-            const position = boardLists.length + 1;
+            const position =
+                boardLists.length + 1;
 
             await this.model.createList(
                 Number(boardId),
@@ -314,7 +417,9 @@ class AppPresenter {
     ) {
         try {
             if (title.trim() === '') {
-                alert('Il titolo della lista non può essere vuoto');
+                alert(
+                    'Il titolo della lista non può essere vuoto'
+                );
                 return;
             }
 
