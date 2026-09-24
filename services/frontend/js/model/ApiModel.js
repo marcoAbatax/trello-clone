@@ -113,4 +113,28 @@ async updateCard(cardId, title, description, position) {
 
     return await response.json();
 }
+
+async moveCard(cardId, listId, position) {
+    const response = await fetch(
+        `${this.baseUrl}/cards/${cardId}/move`,
+        {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                list_id: listId,
+                position: position
+            })
+        }
+    );
+
+    if (!response.ok) {
+        throw new Error(
+            'Errore durante lo spostamento della card'
+        );
+    }
+
+    return await response.json();
+}
 }

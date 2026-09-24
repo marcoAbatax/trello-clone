@@ -85,6 +85,19 @@ class AppPresenter {
                         description,
                         position
                     );
+                },
+
+                async (
+                    cardId,
+                    listId,
+                    position
+                ) => {
+                    await this.moveCard(
+                        boardId,
+                        cardId,
+                        listId,
+                        position
+                    );
                 }
             );
 
@@ -166,6 +179,28 @@ class AppPresenter {
                 Number(cardId),
                 title,
                 description,
+                Number(position)
+            );
+
+            await this.openBoard(boardId);
+
+        } catch (error) {
+            this.view.showError(
+                error.message
+            );
+        }
+    }
+
+    async moveCard(
+        boardId,
+        cardId,
+        listId,
+        position
+    ) {
+        try {
+            await this.model.moveCard(
+                Number(cardId),
+                Number(listId),
                 Number(position)
             );
 

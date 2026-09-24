@@ -54,7 +54,8 @@ export class AppView {
         onBack,
         onAddCard,
         onDeleteCard,
-        onEditCard
+        onEditCard,
+        onMoveCard
     ) {
         const listsHtml = lists
             .map(list => {
@@ -64,7 +65,11 @@ export class AppView {
 
                 const cardsHtml = listCards
                     .map(card => `
-                        <div class="card">
+                        <div
+                            class="card"
+                            draggable="true"
+                            data-card-id="${card.id}"
+                        >
                             <h4>${card.title}</h4>
 
                             <p>
@@ -89,7 +94,10 @@ export class AppView {
                     .join('');
 
                 return `
-                    <div class="list">
+                    <div
+                        class="list"
+                        data-list-id="${list.id}"
+                    >
 
                         <h3>${list.title}</h3>
 
@@ -244,6 +252,53 @@ export class AppView {
                     card.position
                 );
             });
+        });
+
+        const cardElements = document.querySelectorAll(
+            '.card'
+        );
+
+        let draggedCardId = null;
+
+        cardElements.forEach(cardElement => {
+            cardElement.addEventListener('dragstart', () => {
+                draggedCardId = cardElement.dataset.cardId;
+            });
+        });
+
+        const listElements = document.querySelectorAll(
+            '.list'
+        );
+
+        listElements.forEach(listElement => {
+            listElement.addEventListener(
+                'dragover',
+                event => {
+                    event.preventDefault();
+                }
+            );
+
+            listElement.addEventListener(
+                'drop',
+                () => {
+                    const listId =
+                        listElement.dataset.listId;
+
+                    const cardsInDestinationList =
+                        listElement.querySelectorAll(
+                            '.card'
+                        );
+
+                    const position =
+                        cardsInDestinationList.length + 1;
+
+                    onMoveCard(
+                        draggedCardId,
+                        listId,
+                        position
+                    );
+                }
+            );
         });
     }
 
