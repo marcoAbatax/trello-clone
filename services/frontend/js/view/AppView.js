@@ -100,9 +100,15 @@ export class AppView {
 
         const listsHtml = lists
             .map(list => {
-                const listCards = cards.filter(
-                    card => card.list_id == list.id
-                );
+                const listCards = cards
+                    .filter(
+                        card => card.list_id == list.id
+                    )
+                    .sort(
+                        (a, b) =>
+                            Number(a.position) -
+                            Number(b.position)
+                    );
 
                 const cardsHtml = listCards
                     .map(card => {
@@ -379,7 +385,8 @@ export class AppView {
             .querySelectorAll('.edit-card-button')
             .forEach(button => {
                 button.addEventListener('click', () => {
-                    const cardId = button.dataset.cardId;
+                    const cardId =
+                        button.dataset.cardId;
 
                     const card = cards.find(
                         card => card.id == cardId
@@ -417,15 +424,72 @@ export class AppView {
         document
             .querySelectorAll('.card')
             .forEach(cardElement => {
-                cardElement.addEventListener('dragstart', () => {
-                    draggedCardId =
-                        cardElement.dataset.cardId;
-                });
+
+                cardElement.addEventListener(
+                    'dragstart',
+                    () => {
+                        draggedCardId =
+                            cardElement.dataset.cardId;
+                    }
+                );
+
+                cardElement.addEventListener(
+                    'dragover',
+                    event => {
+                        event.preventDefault();
+                        event.stopPropagation();
+                    }
+                );
+
+                cardElement.addEventListener(
+                    'drop',
+                    event => {
+                        event.preventDefault();
+                        event.stopPropagation();
+
+                        const targetCardId =
+                            cardElement.dataset.cardId;
+
+                        if (
+                            draggedCardId ===
+                            targetCardId
+                        ) {
+                            return;
+                        }
+
+                        const targetCard =
+                            cards.find(
+                                card =>
+                                    card.id ==
+                                    targetCardId
+                            );
+
+                        const listElement =
+                            cardElement.closest(
+                                '.list'
+                            );
+
+                        const listId =
+                            listElement.dataset.listId;
+
+                        const position =
+                            Number(
+                                targetCard.position
+                            );
+
+                        onMoveCard(
+                            draggedCardId,
+                            listId,
+                            position
+                        );
+                    }
+                );
             });
 
         document
             .querySelectorAll('.list')
             .forEach(listElement => {
+
                 listElement.addEventListener(
                     'dragover',
                     event => {
@@ -435,17 +499,39 @@ export class AppView {
 
                 listElement.addEventListener(
                     'drop',
-                    () => {
+                    event => {
+                        event.preventDefault();
+
                         const listId =
                             listElement.dataset.listId;
 
-                        const cardsInDestinationList =
-                            listElement.querySelectorAll(
-                                '.card'
+                        const draggedCard =
+                            cards.find(
+                                card =>
+                                    card.id ==
+                                    draggedCardId
                             );
 
-                        const position =
-                            cardsInDestinationList.length + 1;
+                        const cardsInDestinationList =
+                            cards.filter(
+                                card =>
+                                    card.list_id ==
+                                    listId
+                            );
+
+                        let position;
+
+                        if (
+                            draggedCard &&
+                            draggedCard.list_id ==
+                            listId
+                        ) {
+                            position =
+                                cardsInDestinationList.length;
+                        } else {
+                            position =
+                                cardsInDestinationList.length + 1;
+                        }
 
                         onMoveCard(
                             draggedCardId,
@@ -520,10 +606,13 @@ export class AppView {
                         'member-select'
                     );
 
-                const userId = select.value;
+                const userId =
+                    select.value;
 
                 if (userId === '') {
-                    alert('Seleziona un utente');
+                    alert(
+                        'Seleziona un utente'
+                    );
                     return;
                 }
 
@@ -531,51 +620,68 @@ export class AppView {
             });
 
         document
-            .querySelectorAll('.remove-member-button')
+            .querySelectorAll(
+                '.remove-member-button'
+            )
             .forEach(button => {
-                button.addEventListener('click', () => {
-                    onRemoveMember(
-                        button.dataset.userId
-                    );
-                });
-            });
-
-        document
-            .querySelectorAll('.add-assignment-button')
-            .forEach(button => {
-                button.addEventListener('click', () => {
-                    const cardId =
-                        button.dataset.cardId;
-
-                    const select = document.querySelector(
-                        `.assignment-select[data-card-id="${cardId}"]`
-                    );
-
-                    const userId = select.value;
-
-                    if (userId === '') {
-                        alert(
-                            'Seleziona un membro da assegnare'
+                button.addEventListener(
+                    'click',
+                    () => {
+                        onRemoveMember(
+                            button.dataset.userId
                         );
-                        return;
                     }
-
-                    onAddAssignment(
-                        cardId,
-                        userId
-                    );
-                });
+                );
             });
 
         document
-            .querySelectorAll('.remove-assignment-button')
+            .querySelectorAll(
+                '.add-assignment-button'
+            )
             .forEach(button => {
-                button.addEventListener('click', () => {
-                    onRemoveAssignment(
-                        button.dataset.cardId,
-                        button.dataset.userId
-                    );
-                });
+                button.addEventListener(
+                    'click',
+                    () => {
+                        const cardId =
+                            button.dataset.cardId;
+
+                        const select =
+                            document.querySelector(
+                                `.assignment-select[data-card-id="${cardId}"]`
+                            );
+
+                        const userId =
+                            select.value;
+
+                        if (userId === '') {
+                            alert(
+                                'Seleziona un membro da assegnare'
+                            );
+                            return;
+                        }
+
+                        onAddAssignment(
+                            cardId,
+                            userId
+                        );
+                    }
+                );
+            });
+
+        document
+            .querySelectorAll(
+                '.remove-assignment-button'
+            )
+            .forEach(button => {
+                button.addEventListener(
+                    'click',
+                    () => {
+                        onRemoveAssignment(
+                            button.dataset.cardId,
+                            button.dataset.userId
+                        );
+                    }
+                );
             });
     }
 
