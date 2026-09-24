@@ -55,7 +55,10 @@ export class AppView {
         onAddCard,
         onDeleteCard,
         onEditCard,
-        onMoveCard
+        onMoveCard,
+        onAddList,
+        onEditList,
+        onDeleteList
     ) {
         const listsHtml = lists
             .map(list => {
@@ -98,8 +101,21 @@ export class AppView {
                         class="list"
                         data-list-id="${list.id}"
                     >
-
                         <h3>${list.title}</h3>
+
+                        <button
+                            class="edit-list-button"
+                            data-list-id="${list.id}"
+                        >
+                            Modifica lista
+                        </button>
+
+                        <button
+                            class="delete-list-button"
+                            data-list-id="${list.id}"
+                        >
+                            Elimina lista
+                        </button>
 
                         <div class="cards">
                             ${cardsHtml}
@@ -135,7 +151,6 @@ export class AppView {
                                 Salva
                             </button>
                         </div>
-
                     </div>
                 `;
             })
@@ -150,6 +165,27 @@ export class AppView {
 
             <div class="lists">
                 ${listsHtml}
+
+                <div class="new-list-container">
+                    <button id="add-list-button">
+                        + Aggiungi lista
+                    </button>
+
+                    <div
+                        id="add-list-form"
+                        style="display: none;"
+                    >
+                        <input
+                            type="text"
+                            id="list-title-input"
+                            placeholder="Titolo lista"
+                        >
+
+                        <button id="save-list-button">
+                            Salva lista
+                        </button>
+                    </div>
+                </div>
             </div>
         `;
 
@@ -203,11 +239,11 @@ export class AppView {
             });
         });
 
-        const deleteButtons = document.querySelectorAll(
+        const deleteCardButtons = document.querySelectorAll(
             '.delete-card-button'
         );
 
-        deleteButtons.forEach(button => {
+        deleteCardButtons.forEach(button => {
             button.addEventListener('click', () => {
                 const cardId = button.dataset.cardId;
 
@@ -215,11 +251,11 @@ export class AppView {
             });
         });
 
-        const editButtons = document.querySelectorAll(
+        const editCardButtons = document.querySelectorAll(
             '.edit-card-button'
         );
 
-        editButtons.forEach(button => {
+        editCardButtons.forEach(button => {
             button.addEventListener('click', () => {
                 const cardId = button.dataset.cardId;
 
@@ -254,9 +290,7 @@ export class AppView {
             });
         });
 
-        const cardElements = document.querySelectorAll(
-            '.card'
-        );
+        const cardElements = document.querySelectorAll('.card');
 
         let draggedCardId = null;
 
@@ -266,39 +300,93 @@ export class AppView {
             });
         });
 
-        const listElements = document.querySelectorAll(
-            '.list'
-        );
+        const listElements = document.querySelectorAll('.list');
 
         listElements.forEach(listElement => {
-            listElement.addEventListener(
-                'dragover',
-                event => {
-                    event.preventDefault();
+            listElement.addEventListener('dragover', event => {
+                event.preventDefault();
+            });
+
+            listElement.addEventListener('drop', () => {
+                const listId = listElement.dataset.listId;
+
+                const cardsInDestinationList =
+                    listElement.querySelectorAll('.card');
+
+                const position =
+                    cardsInDestinationList.length + 1;
+
+                onMoveCard(
+                    draggedCardId,
+                    listId,
+                    position
+                );
+            });
+        });
+
+        const addListButton = document.getElementById(
+            'add-list-button'
+        );
+
+        const addListForm = document.getElementById(
+            'add-list-form'
+        );
+
+        addListButton.addEventListener('click', () => {
+            addListForm.style.display = 'block';
+        });
+
+        const saveListButton = document.getElementById(
+            'save-list-button'
+        );
+
+        saveListButton.addEventListener('click', () => {
+            const title = document.getElementById(
+                'list-title-input'
+            ).value;
+
+            onAddList(title);
+        });
+
+        const editListButtons = document.querySelectorAll(
+            '.edit-list-button'
+        );
+
+        editListButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                const listId = button.dataset.listId;
+
+                const list = lists.find(
+                    list => list.id == listId
+                );
+
+                const newTitle = prompt(
+                    'Nuovo titolo della lista:',
+                    list.title
+                );
+
+                if (newTitle === null) {
+                    return;
                 }
-            );
 
-            listElement.addEventListener(
-                'drop',
-                () => {
-                    const listId =
-                        listElement.dataset.listId;
+                onEditList(
+                    listId,
+                    newTitle,
+                    list.position
+                );
+            });
+        });
 
-                    const cardsInDestinationList =
-                        listElement.querySelectorAll(
-                            '.card'
-                        );
+        const deleteListButtons = document.querySelectorAll(
+            '.delete-list-button'
+        );
 
-                    const position =
-                        cardsInDestinationList.length + 1;
+        deleteListButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                const listId = button.dataset.listId;
 
-                    onMoveCard(
-                        draggedCardId,
-                        listId,
-                        position
-                    );
-                }
-            );
+                onDeleteList(listId);
+            });
         });
     }
 

@@ -137,4 +137,70 @@ async moveCard(cardId, listId, position) {
 
     return await response.json();
 }
+
+async createList(boardId, title, position) {
+    const response = await fetch(
+        `${this.baseUrl}/lists`,
+        {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                board_id: boardId,
+                title: title,
+                position: position
+            })
+        }
+    );
+
+    if (!response.ok) {
+        throw new Error(
+            'Errore durante la creazione della lista'
+        );
+    }
+
+    return await response.json();
+}
+
+async updateList(listId, title, position) {
+    const response = await fetch(
+        `${this.baseUrl}/lists/${listId}`,
+        {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                title: title,
+                position: position
+            })
+        }
+    );
+
+    if (!response.ok) {
+        throw new Error(
+            'Errore durante la modifica della lista'
+        );
+    }
+
+    return await response.json();
+}
+
+async deleteList(listId) {
+    const response = await fetch(
+        `${this.baseUrl}/lists/${listId}`,
+        {
+            method: 'DELETE'
+        }
+    );
+
+    if (!response.ok) {
+        throw new Error(
+            'Errore durante l\'eliminazione della lista'
+        );
+    }
+
+    return await response.json();
+}
 }

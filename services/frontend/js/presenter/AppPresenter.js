@@ -98,6 +98,33 @@ class AppPresenter {
                         listId,
                         position
                     );
+                },
+
+                async title => {
+                    await this.addList(
+                        boardId,
+                        title
+                    );
+                },
+
+                async (
+                    listId,
+                    title,
+                    position
+                ) => {
+                    await this.editList(
+                        boardId,
+                        listId,
+                        title,
+                        position
+                    );
+                },
+
+                async listId => {
+                    await this.deleteList(
+                        boardId,
+                        listId
+                    );
                 }
             );
 
@@ -202,6 +229,84 @@ class AppPresenter {
                 Number(cardId),
                 Number(listId),
                 Number(position)
+            );
+
+            await this.openBoard(boardId);
+
+        } catch (error) {
+            this.view.showError(
+                error.message
+            );
+        }
+    }
+
+    async addList(
+        boardId,
+        title
+    ) {
+        try {
+            if (title.trim() === '') {
+                alert('Inserisci un titolo per la lista');
+                return;
+            }
+
+            const lists = await this.model.getLists();
+
+            const boardLists = lists.filter(
+                list => list.board_id == boardId
+            );
+
+            const position = boardLists.length + 1;
+
+            await this.model.createList(
+                Number(boardId),
+                title,
+                position
+            );
+
+            await this.openBoard(boardId);
+
+        } catch (error) {
+            this.view.showError(
+                error.message
+            );
+        }
+    }
+
+    async editList(
+        boardId,
+        listId,
+        title,
+        position
+    ) {
+        try {
+            if (title.trim() === '') {
+                alert('Il titolo della lista non può essere vuoto');
+                return;
+            }
+
+            await this.model.updateList(
+                Number(listId),
+                title,
+                Number(position)
+            );
+
+            await this.openBoard(boardId);
+
+        } catch (error) {
+            this.view.showError(
+                error.message
+            );
+        }
+    }
+
+    async deleteList(
+        boardId,
+        listId
+    ) {
+        try {
+            await this.model.deleteList(
+                Number(listId)
             );
 
             await this.openBoard(boardId);
