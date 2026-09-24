@@ -123,3 +123,41 @@ main {
     margin-top: 4px;
     font-size: 12px;
 }
+
+.card-assignments {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+    margin: 8px 0;
+}
+
+.card-assignment {
+    padding: 4px 8px;
+    background-color: #e4e6ea;
+    border-radius: 12px;
+    font-size: 12px;
+}
+
+.assignment-controls {
+    display: flex;
+    gap: 6px;
+    margin: 8px 0;
+}
+
+.assignment-select {
+    flex: 1;
+    min-width: 0;
+}
+
+.card-assignment {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.remove-assignment-button {
+    padding: 0 4px;
+    border: none;
+    background: transparent;
+    cursor: pointer;
+}

@@ -35,15 +35,15 @@ export class AppView {
             </div>
         `;
 
-        const boardElements = document.querySelectorAll('.board');
-
-        boardElements.forEach(boardElement => {
-            boardElement.addEventListener('click', () => {
-                const boardId = boardElement.dataset.boardId;
-
-                onBoardClick(boardId);
+        document
+            .querySelectorAll('.board')
+            .forEach(boardElement => {
+                boardElement.addEventListener('click', () => {
+                    onBoardClick(
+                        boardElement.dataset.boardId
+                    );
+                });
             });
-        });
     }
 
     showBoard(
@@ -52,6 +52,7 @@ export class AppView {
         cards,
         members,
         users,
+        assignments,
         onBack,
         onAddCard,
         onDeleteCard,
@@ -61,7 +62,9 @@ export class AppView {
         onEditList,
         onDeleteList,
         onAddMember,
-        onRemoveMember
+        onRemoveMember,
+        onAddAssignment,
+        onRemoveAssignment
     ) {
         const membersHtml = members
             .map(member => `
@@ -102,33 +105,103 @@ export class AppView {
                 );
 
                 const cardsHtml = listCards
-                    .map(card => `
-                        <div
-                            class="card"
-                            draggable="true"
-                            data-card-id="${card.id}"
-                        >
-                            <h4>${card.title}</h4>
+                    .map(card => {
+                        const cardAssignments =
+                            assignments[card.id] ?? [];
 
-                            <p>
-                                ${card.description ?? ''}
-                            </p>
+                        const assignedUserIds =
+                            cardAssignments.map(
+                                user => Number(user.id)
+                            );
 
-                            <button
-                                class="edit-card-button"
+                        const availableMembers =
+                            members.filter(
+                                member =>
+                                    !assignedUserIds.includes(
+                                        Number(member.id)
+                                    )
+                            );
+
+                        const assignmentsHtml =
+                            cardAssignments
+                                .map(user => `
+                                    <div class="card-assignment">
+                                        <span>
+                                            ${user.name}
+                                        </span>
+
+                                        <button
+                                            class="remove-assignment-button"
+                                            data-card-id="${card.id}"
+                                            data-user-id="${user.id}"
+                                        >
+                                            ×
+                                        </button>
+                                    </div>
+                                `)
+                                .join('');
+
+                        const assignmentOptions =
+                            availableMembers
+                                .map(member => `
+                                    <option value="${member.id}">
+                                        ${member.name}
+                                    </option>
+                                `)
+                                .join('');
+
+                        return `
+                            <div
+                                class="card"
+                                draggable="true"
                                 data-card-id="${card.id}"
                             >
-                                Modifica
-                            </button>
+                                <h4>${card.title}</h4>
 
-                            <button
-                                class="delete-card-button"
-                                data-card-id="${card.id}"
-                            >
-                                Elimina
-                            </button>
-                        </div>
-                    `)
+                                <p>
+                                    ${card.description ?? ''}
+                                </p>
+
+                                <div class="card-assignments">
+                                    ${assignmentsHtml}
+                                </div>
+
+                                <div class="assignment-controls">
+                                    <select
+                                        class="assignment-select"
+                                        data-card-id="${card.id}"
+                                    >
+                                        <option value="">
+                                            Assegna membro
+                                        </option>
+
+                                        ${assignmentOptions}
+                                    </select>
+
+                                    <button
+                                        class="add-assignment-button"
+                                        data-card-id="${card.id}"
+                                    >
+                                        Assegna
+                                    </button>
+                                </div>
+
+                                <button
+                                    class="edit-card-button"
+                                    data-card-id="${card.id}"
+                                >
+                                    Modifica
+                                </button>
+
+                                <button
+                                    class="delete-card-button"
+                                    data-card-id="${card.id}"
+                                >
+                                    Elimina
+                                </button>
+                            </div>
+                        `;
+                    })
                     .join('');
 
                 return `
@@ -246,236 +319,264 @@ export class AppView {
             </div>
         `;
 
-        const backButton = document.getElementById('back-button');
-
-        backButton.addEventListener('click', () => {
-            onBack();
-        });
-
-        const addButtons = document.querySelectorAll(
-            '.add-card-button'
-        );
-
-        addButtons.forEach(button => {
-            button.addEventListener('click', () => {
-                const listId = button.dataset.listId;
-
-                const form = document.querySelector(
-                    `[data-form-list-id="${listId}"]`
-                );
-
-                form.style.display = 'block';
+        document
+            .getElementById('back-button')
+            .addEventListener('click', () => {
+                onBack();
             });
-        });
 
-        const saveButtons = document.querySelectorAll(
-            '.save-card-button'
-        );
+        document
+            .querySelectorAll('.add-card-button')
+            .forEach(button => {
+                button.addEventListener('click', () => {
+                    const listId = button.dataset.listId;
 
-        saveButtons.forEach(button => {
-            button.addEventListener('click', () => {
-                const listId = button.dataset.listId;
+                    const form = document.querySelector(
+                        `[data-form-list-id="${listId}"]`
+                    );
 
-                const form = document.querySelector(
-                    `[data-form-list-id="${listId}"]`
-                );
-
-                const title = form
-                    .querySelector('.card-title-input')
-                    .value;
-
-                const description = form
-                    .querySelector('.card-description-input')
-                    .value;
-
-                onAddCard(
-                    listId,
-                    title,
-                    description
-                );
+                    form.style.display = 'block';
+                });
             });
-        });
 
-        const deleteCardButtons = document.querySelectorAll(
-            '.delete-card-button'
-        );
+        document
+            .querySelectorAll('.save-card-button')
+            .forEach(button => {
+                button.addEventListener('click', () => {
+                    const listId = button.dataset.listId;
 
-        deleteCardButtons.forEach(button => {
-            button.addEventListener('click', () => {
-                const cardId = button.dataset.cardId;
+                    const form = document.querySelector(
+                        `[data-form-list-id="${listId}"]`
+                    );
 
-                onDeleteCard(cardId);
+                    const title = form
+                        .querySelector('.card-title-input')
+                        .value;
+
+                    const description = form
+                        .querySelector('.card-description-input')
+                        .value;
+
+                    onAddCard(
+                        listId,
+                        title,
+                        description
+                    );
+                });
             });
-        });
 
-        const editCardButtons = document.querySelectorAll(
-            '.edit-card-button'
-        );
-
-        editCardButtons.forEach(button => {
-            button.addEventListener('click', () => {
-                const cardId = button.dataset.cardId;
-
-                const card = cards.find(
-                    card => card.id == cardId
-                );
-
-                const newTitle = prompt(
-                    'Nuovo titolo:',
-                    card.title
-                );
-
-                if (newTitle === null) {
-                    return;
-                }
-
-                const newDescription = prompt(
-                    'Nuova descrizione:',
-                    card.description ?? ''
-                );
-
-                if (newDescription === null) {
-                    return;
-                }
-
-                onEditCard(
-                    cardId,
-                    newTitle,
-                    newDescription,
-                    card.position
-                );
+        document
+            .querySelectorAll('.delete-card-button')
+            .forEach(button => {
+                button.addEventListener('click', () => {
+                    onDeleteCard(
+                        button.dataset.cardId
+                    );
+                });
             });
-        });
 
-        const cardElements = document.querySelectorAll('.card');
+        document
+            .querySelectorAll('.edit-card-button')
+            .forEach(button => {
+                button.addEventListener('click', () => {
+                    const cardId = button.dataset.cardId;
+
+                    const card = cards.find(
+                        card => card.id == cardId
+                    );
+
+                    const newTitle = prompt(
+                        'Nuovo titolo:',
+                        card.title
+                    );
+
+                    if (newTitle === null) {
+                        return;
+                    }
+
+                    const newDescription = prompt(
+                        'Nuova descrizione:',
+                        card.description ?? ''
+                    );
+
+                    if (newDescription === null) {
+                        return;
+                    }
+
+                    onEditCard(
+                        cardId,
+                        newTitle,
+                        newDescription,
+                        card.position
+                    );
+                });
+            });
 
         let draggedCardId = null;
 
-        cardElements.forEach(cardElement => {
-            cardElement.addEventListener('dragstart', () => {
-                draggedCardId = cardElement.dataset.cardId;
-            });
-        });
-
-        const listElements = document.querySelectorAll('.list');
-
-        listElements.forEach(listElement => {
-            listElement.addEventListener('dragover', event => {
-                event.preventDefault();
+        document
+            .querySelectorAll('.card')
+            .forEach(cardElement => {
+                cardElement.addEventListener('dragstart', () => {
+                    draggedCardId =
+                        cardElement.dataset.cardId;
+                });
             });
 
-            listElement.addEventListener('drop', () => {
-                const listId = listElement.dataset.listId;
+        document
+            .querySelectorAll('.list')
+            .forEach(listElement => {
+                listElement.addEventListener(
+                    'dragover',
+                    event => {
+                        event.preventDefault();
+                    }
+                );
 
-                const cardsInDestinationList =
-                    listElement.querySelectorAll('.card');
+                listElement.addEventListener(
+                    'drop',
+                    () => {
+                        const listId =
+                            listElement.dataset.listId;
 
-                const position =
-                    cardsInDestinationList.length + 1;
+                        const cardsInDestinationList =
+                            listElement.querySelectorAll(
+                                '.card'
+                            );
 
-                onMoveCard(
-                    draggedCardId,
-                    listId,
-                    position
+                        const position =
+                            cardsInDestinationList.length + 1;
+
+                        onMoveCard(
+                            draggedCardId,
+                            listId,
+                            position
+                        );
+                    }
                 );
             });
-        });
 
-        const addListButton = document.getElementById(
-            'add-list-button'
-        );
+        document
+            .getElementById('add-list-button')
+            .addEventListener('click', () => {
+                document
+                    .getElementById('add-list-form')
+                    .style.display = 'block';
+            });
 
-        const addListForm = document.getElementById(
-            'add-list-form'
-        );
+        document
+            .getElementById('save-list-button')
+            .addEventListener('click', () => {
+                const title = document
+                    .getElementById('list-title-input')
+                    .value;
 
-        addListButton.addEventListener('click', () => {
-            addListForm.style.display = 'block';
-        });
+                onAddList(title);
+            });
 
-        const saveListButton = document.getElementById(
-            'save-list-button'
-        );
+        document
+            .querySelectorAll('.edit-list-button')
+            .forEach(button => {
+                button.addEventListener('click', () => {
+                    const listId =
+                        button.dataset.listId;
 
-        saveListButton.addEventListener('click', () => {
-            const title = document.getElementById(
-                'list-title-input'
-            ).value;
+                    const list = lists.find(
+                        list => list.id == listId
+                    );
 
-            onAddList(title);
-        });
+                    const newTitle = prompt(
+                        'Nuovo titolo della lista:',
+                        list.title
+                    );
 
-        const editListButtons = document.querySelectorAll(
-            '.edit-list-button'
-        );
+                    if (newTitle === null) {
+                        return;
+                    }
 
-        editListButtons.forEach(button => {
-            button.addEventListener('click', () => {
-                const listId = button.dataset.listId;
+                    onEditList(
+                        listId,
+                        newTitle,
+                        list.position
+                    );
+                });
+            });
 
-                const list = lists.find(
-                    list => list.id == listId
-                );
+        document
+            .querySelectorAll('.delete-list-button')
+            .forEach(button => {
+                button.addEventListener('click', () => {
+                    onDeleteList(
+                        button.dataset.listId
+                    );
+                });
+            });
 
-                const newTitle = prompt(
-                    'Nuovo titolo della lista:',
-                    list.title
-                );
+        document
+            .getElementById('add-member-button')
+            .addEventListener('click', () => {
+                const select =
+                    document.getElementById(
+                        'member-select'
+                    );
 
-                if (newTitle === null) {
+                const userId = select.value;
+
+                if (userId === '') {
+                    alert('Seleziona un utente');
                     return;
                 }
 
-                onEditList(
-                    listId,
-                    newTitle,
-                    list.position
-                );
+                onAddMember(userId);
             });
-        });
 
-        const deleteListButtons = document.querySelectorAll(
-            '.delete-list-button'
-        );
-
-        deleteListButtons.forEach(button => {
-            button.addEventListener('click', () => {
-                const listId = button.dataset.listId;
-
-                onDeleteList(listId);
+        document
+            .querySelectorAll('.remove-member-button')
+            .forEach(button => {
+                button.addEventListener('click', () => {
+                    onRemoveMember(
+                        button.dataset.userId
+                    );
+                });
             });
-        });
 
-        const addMemberButton = document.getElementById(
-            'add-member-button'
-        );
+        document
+            .querySelectorAll('.add-assignment-button')
+            .forEach(button => {
+                button.addEventListener('click', () => {
+                    const cardId =
+                        button.dataset.cardId;
 
-        addMemberButton.addEventListener('click', () => {
-            const select = document.getElementById(
-                'member-select'
-            );
+                    const select = document.querySelector(
+                        `.assignment-select[data-card-id="${cardId}"]`
+                    );
 
-            const userId = select.value;
+                    const userId = select.value;
 
-            if (userId === '') {
-                alert('Seleziona un utente');
-                return;
-            }
+                    if (userId === '') {
+                        alert(
+                            'Seleziona un membro da assegnare'
+                        );
+                        return;
+                    }
 
-            onAddMember(userId);
-        });
-
-        const removeMemberButtons = document.querySelectorAll(
-            '.remove-member-button'
-        );
-
-        removeMemberButtons.forEach(button => {
-            button.addEventListener('click', () => {
-                const userId = button.dataset.userId;
-
-                onRemoveMember(userId);
+                    onAddAssignment(
+                        cardId,
+                        userId
+                    );
+                });
             });
-        });
+
+        document
+            .querySelectorAll('.remove-assignment-button')
+            .forEach(button => {
+                button.addEventListener('click', () => {
+                    onRemoveAssignment(
+                        button.dataset.cardId,
+                        button.dataset.userId
+                    );
+                });
+            });
     }
 
     showError(message) {

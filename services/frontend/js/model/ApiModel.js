@@ -271,4 +271,58 @@ async getUsers() {
 
     return await response.json();
 }
+
+async getCardAssignments(cardId) {
+    const response = await fetch(
+        `${this.baseUrl}/cards/${cardId}/assignments`
+    );
+
+    if (!response.ok) {
+        throw new Error(
+            'Errore durante il caricamento degli assegnatari'
+        );
+    }
+
+    return await response.json();
+}
+
+async addCardAssignment(cardId, userId) {
+    const response = await fetch(
+        `${this.baseUrl}/cards/${cardId}/assignments`,
+        {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                user_id: userId
+            })
+        }
+    );
+
+    if (!response.ok) {
+        throw new Error(
+            'Errore durante l\'assegnazione dell\'utente'
+        );
+    }
+
+    return await response.json();
+}
+
+async removeCardAssignment(cardId, userId) {
+    const response = await fetch(
+        `${this.baseUrl}/cards/${cardId}/assignments/${userId}`,
+        {
+            method: 'DELETE'
+        }
+    );
+
+    if (!response.ok) {
+        throw new Error(
+            'Errore durante la rimozione dell\'assegnazione'
+        );
+    }
+
+    return await response.json();
+}
 }

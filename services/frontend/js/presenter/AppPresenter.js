@@ -1,4 +1,4 @@
-import { ApiModel } from '../model/ApiModel.js';
+import { ApiModel } from '../model/ApiModel.js?v=2';
 import { AppView } from '../view/AppView.js';
 
 class AppPresenter {
@@ -15,13 +15,10 @@ class AppPresenter {
 
         try {
             this.boards = await this.model.getBoards();
-
             this.showBoards();
 
         } catch (error) {
-            this.view.showError(
-                error.message
-            );
+            this.view.showError(error.message);
         }
     }
 
@@ -41,6 +38,13 @@ class AppPresenter {
             const members = await this.model.getBoardMembers(boardId);
             const users = await this.model.getUsers();
 
+            const assignments = {};
+
+            for (const card of cards) {
+                assignments[card.id] =
+                    await this.model.getCardAssignments(card.id);
+            }
+
             const boardLists = lists.filter(
                 list => list.board_id == boardId
             );
@@ -55,6 +59,7 @@ class AppPresenter {
                 cards,
                 members,
                 users,
+                assignments,
 
                 () => {
                     this.showBoards();
@@ -143,13 +148,33 @@ class AppPresenter {
                         boardId,
                         userId
                     );
+                },
+
+                async (
+                    cardId,
+                    userId
+                ) => {
+                    await this.addCardAssignment(
+                        boardId,
+                        cardId,
+                        userId
+                    );
+                },
+
+                async (
+                    cardId,
+                    userId
+                ) => {
+                    await this.removeCardAssignment(
+                        boardId,
+                        cardId,
+                        userId
+                    );
                 }
             );
 
         } catch (error) {
-            this.view.showError(
-                error.message
-            );
+            this.view.showError(error.message);
         }
     }
 
@@ -183,9 +208,7 @@ class AppPresenter {
             await this.openBoard(boardId);
 
         } catch (error) {
-            this.view.showError(
-                error.message
-            );
+            this.view.showError(error.message);
         }
     }
 
@@ -201,9 +224,7 @@ class AppPresenter {
             await this.openBoard(boardId);
 
         } catch (error) {
-            this.view.showError(
-                error.message
-            );
+            this.view.showError(error.message);
         }
     }
 
@@ -230,9 +251,7 @@ class AppPresenter {
             await this.openBoard(boardId);
 
         } catch (error) {
-            this.view.showError(
-                error.message
-            );
+            this.view.showError(error.message);
         }
     }
 
@@ -252,9 +271,7 @@ class AppPresenter {
             await this.openBoard(boardId);
 
         } catch (error) {
-            this.view.showError(
-                error.message
-            );
+            this.view.showError(error.message);
         }
     }
 
@@ -285,9 +302,7 @@ class AppPresenter {
             await this.openBoard(boardId);
 
         } catch (error) {
-            this.view.showError(
-                error.message
-            );
+            this.view.showError(error.message);
         }
     }
 
@@ -312,9 +327,7 @@ class AppPresenter {
             await this.openBoard(boardId);
 
         } catch (error) {
-            this.view.showError(
-                error.message
-            );
+            this.view.showError(error.message);
         }
     }
 
@@ -330,9 +343,7 @@ class AppPresenter {
             await this.openBoard(boardId);
 
         } catch (error) {
-            this.view.showError(
-                error.message
-            );
+            this.view.showError(error.message);
         }
     }
 
@@ -349,9 +360,7 @@ class AppPresenter {
             await this.openBoard(boardId);
 
         } catch (error) {
-            this.view.showError(
-                error.message
-            );
+            this.view.showError(error.message);
         }
     }
 
@@ -368,9 +377,43 @@ class AppPresenter {
             await this.openBoard(boardId);
 
         } catch (error) {
-            this.view.showError(
-                error.message
+            this.view.showError(error.message);
+        }
+    }
+
+    async addCardAssignment(
+        boardId,
+        cardId,
+        userId
+    ) {
+        try {
+            await this.model.addCardAssignment(
+                Number(cardId),
+                Number(userId)
             );
+
+            await this.openBoard(boardId);
+
+        } catch (error) {
+            this.view.showError(error.message);
+        }
+    }
+
+    async removeCardAssignment(
+        boardId,
+        cardId,
+        userId
+    ) {
+        try {
+            await this.model.removeCardAssignment(
+                Number(cardId),
+                Number(userId)
+            );
+
+            await this.openBoard(boardId);
+
+        } catch (error) {
+            this.view.showError(error.message);
         }
     }
 }
