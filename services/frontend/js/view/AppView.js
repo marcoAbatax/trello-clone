@@ -47,7 +47,15 @@ export class AppView {
         });
     }
 
-    showBoard(board, lists, cards, onBack, onAddCard) {
+    showBoard(
+        board,
+        lists,
+        cards,
+        onBack,
+        onAddCard,
+        onDeleteCard,
+        onEditCard
+    ) {
         const listsHtml = lists
             .map(list => {
                 const listCards = cards.filter(
@@ -62,6 +70,20 @@ export class AppView {
                             <p>
                                 ${card.description ?? ''}
                             </p>
+
+                            <button
+                                class="edit-card-button"
+                                data-card-id="${card.id}"
+                            >
+                                Modifica
+                            </button>
+
+                            <button
+                                class="delete-card-button"
+                                data-card-id="${card.id}"
+                            >
+                                Elimina
+                            </button>
                         </div>
                     `)
                     .join('');
@@ -169,6 +191,57 @@ export class AppView {
                     listId,
                     title,
                     description
+                );
+            });
+        });
+
+        const deleteButtons = document.querySelectorAll(
+            '.delete-card-button'
+        );
+
+        deleteButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                const cardId = button.dataset.cardId;
+
+                onDeleteCard(cardId);
+            });
+        });
+
+        const editButtons = document.querySelectorAll(
+            '.edit-card-button'
+        );
+
+        editButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                const cardId = button.dataset.cardId;
+
+                const card = cards.find(
+                    card => card.id == cardId
+                );
+
+                const newTitle = prompt(
+                    'Nuovo titolo:',
+                    card.title
+                );
+
+                if (newTitle === null) {
+                    return;
+                }
+
+                const newDescription = prompt(
+                    'Nuova descrizione:',
+                    card.description ?? ''
+                );
+
+                if (newDescription === null) {
+                    return;
+                }
+
+                onEditCard(
+                    cardId,
+                    newTitle,
+                    newDescription,
+                    card.position
                 );
             });
         });

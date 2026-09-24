@@ -51,15 +51,39 @@ class AppPresenter {
                 board,
                 boardLists,
                 cards,
+
                 () => {
                     this.showBoards();
                 },
+
                 async (listId, title, description) => {
                     await this.addCard(
                         boardId,
                         listId,
                         title,
                         description
+                    );
+                },
+
+                async cardId => {
+                    await this.deleteCard(
+                        boardId,
+                        cardId
+                    );
+                },
+
+                async (
+                    cardId,
+                    title,
+                    description,
+                    position
+                ) => {
+                    await this.editCard(
+                        boardId,
+                        cardId,
+                        title,
+                        description,
+                        position
                     );
                 }
             );
@@ -96,6 +120,53 @@ class AppPresenter {
                 title,
                 description,
                 position
+            );
+
+            await this.openBoard(boardId);
+
+        } catch (error) {
+            this.view.showError(
+                error.message
+            );
+        }
+    }
+
+    async deleteCard(
+        boardId,
+        cardId
+    ) {
+        try {
+            await this.model.deleteCard(
+                Number(cardId)
+            );
+
+            await this.openBoard(boardId);
+
+        } catch (error) {
+            this.view.showError(
+                error.message
+            );
+        }
+    }
+
+    async editCard(
+        boardId,
+        cardId,
+        title,
+        description,
+        position
+    ) {
+        try {
+            if (title.trim() === '') {
+                alert('Il titolo non può essere vuoto');
+                return;
+            }
+
+            await this.model.updateCard(
+                Number(cardId),
+                title,
+                description,
+                Number(position)
             );
 
             await this.openBoard(boardId);

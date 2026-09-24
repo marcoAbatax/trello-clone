@@ -71,4 +71,46 @@ async createCard(listId, title, description, position) {
 
     return await response.json();
 }
+
+async deleteCard(cardId) {
+    const response = await fetch(
+        `${this.baseUrl}/cards/${cardId}`,
+        {
+            method: 'DELETE'
+        }
+    );
+
+    if (!response.ok) {
+        throw new Error(
+            'Errore durante l\'eliminazione della card'
+        );
+    }
+
+    return await response.json();
+}
+
+async updateCard(cardId, title, description, position) {
+    const response = await fetch(
+        `${this.baseUrl}/cards/${cardId}`,
+        {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                title: title,
+                description: description,
+                position: position
+            })
+        }
+    );
+
+    if (!response.ok) {
+        throw new Error(
+            'Errore durante la modifica della card'
+        );
+    }
+
+    return await response.json();
+}
 }
