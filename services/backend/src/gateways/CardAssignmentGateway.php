@@ -69,4 +69,25 @@ class CardAssignmentGateway
 
         return (int) $statement->fetchColumn() > 0;
     }
+
+    public function removeAssignmentsForBoardMember(
+        int $boardId,
+        int $userId
+    ): bool {
+        $statement = $this->connection->prepare(
+            "DELETE card_assignments
+             FROM card_assignments
+             JOIN cards
+                ON card_assignments.card_id = cards.id
+             JOIN board_lists
+                ON cards.list_id = board_lists.id
+             WHERE board_lists.board_id = :board_id
+             AND card_assignments.user_id = :user_id"
+        );
+
+        return $statement->execute([
+            'board_id' => $boardId,
+            'user_id' => $userId
+        ]);
+    }
 }

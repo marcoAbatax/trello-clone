@@ -33,7 +33,10 @@ class Controller
     public function handleRequest(): void
     {
         $method = $_SERVER['REQUEST_METHOD'];
-        $path = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
+        $path = parse_url(
+            $_SERVER['REQUEST_URI'],
+            PHP_URL_PATH
+        );
 
         // USERS
 
@@ -47,7 +50,13 @@ class Controller
             return;
         }
 
-        if (preg_match('#^/users/(\d+)$#', $path, $matches)) {
+        if (
+            preg_match(
+                '#^/users/(\d+)$#',
+                $path,
+                $matches
+            )
+        ) {
             $id = (int) $matches[1];
 
             if ($method === 'GET') {
@@ -70,23 +79,39 @@ class Controller
 
         if (
             $method === 'GET' &&
-            preg_match('#^/boards/(\d+)/members$#', $path, $matches)
+            preg_match(
+                '#^/boards/(\d+)/members$#',
+                $path,
+                $matches
+            )
         ) {
-            $this->getBoardMembers((int) $matches[1]);
+            $this->getBoardMembers(
+                (int) $matches[1]
+            );
             return;
         }
 
         if (
             $method === 'POST' &&
-            preg_match('#^/boards/(\d+)/members$#', $path, $matches)
+            preg_match(
+                '#^/boards/(\d+)/members$#',
+                $path,
+                $matches
+            )
         ) {
-            $this->addBoardMember((int) $matches[1]);
+            $this->addBoardMember(
+                (int) $matches[1]
+            );
             return;
         }
 
         if (
             $method === 'DELETE' &&
-            preg_match('#^/boards/(\d+)/members/(\d+)$#', $path, $matches)
+            preg_match(
+                '#^/boards/(\d+)/members/(\d+)$#',
+                $path,
+                $matches
+            )
         ) {
             $this->removeBoardMember(
                 (int) $matches[1],
@@ -107,7 +132,13 @@ class Controller
             return;
         }
 
-        if (preg_match('#^/boards/(\d+)$#', $path, $matches)) {
+        if (
+            preg_match(
+                '#^/boards/(\d+)$#',
+                $path,
+                $matches
+            )
+        ) {
             $id = (int) $matches[1];
 
             if ($method === 'GET') {
@@ -138,7 +169,13 @@ class Controller
             return;
         }
 
-        if (preg_match('#^/lists/(\d+)$#', $path, $matches)) {
+        if (
+            preg_match(
+                '#^/lists/(\d+)$#',
+                $path,
+                $matches
+            )
+        ) {
             $id = (int) $matches[1];
 
             if ($method === 'GET') {
@@ -161,23 +198,39 @@ class Controller
 
         if (
             $method === 'GET' &&
-            preg_match('#^/cards/(\d+)/assignments$#', $path, $matches)
+            preg_match(
+                '#^/cards/(\d+)/assignments$#',
+                $path,
+                $matches
+            )
         ) {
-            $this->getCardAssignments((int) $matches[1]);
+            $this->getCardAssignments(
+                (int) $matches[1]
+            );
             return;
         }
 
         if (
             $method === 'POST' &&
-            preg_match('#^/cards/(\d+)/assignments$#', $path, $matches)
+            preg_match(
+                '#^/cards/(\d+)/assignments$#',
+                $path,
+                $matches
+            )
         ) {
-            $this->addCardAssignment((int) $matches[1]);
+            $this->addCardAssignment(
+                (int) $matches[1]
+            );
             return;
         }
 
         if (
             $method === 'DELETE' &&
-            preg_match('#^/cards/(\d+)/assignments/(\d+)$#', $path, $matches)
+            preg_match(
+                '#^/cards/(\d+)/assignments/(\d+)$#',
+                $path,
+                $matches
+            )
         ) {
             $this->removeCardAssignment(
                 (int) $matches[1],
@@ -190,9 +243,15 @@ class Controller
 
         if (
             $method === 'PUT' &&
-            preg_match('#^/cards/(\d+)/move$#', $path, $matches)
+            preg_match(
+                '#^/cards/(\d+)/move$#',
+                $path,
+                $matches
+            )
         ) {
-            $this->moveCard((int) $matches[1]);
+            $this->moveCard(
+                (int) $matches[1]
+            );
             return;
         }
 
@@ -208,7 +267,13 @@ class Controller
             return;
         }
 
-        if (preg_match('#^/cards/(\d+)$#', $path, $matches)) {
+        if (
+            preg_match(
+                '#^/cards/(\d+)$#',
+                $path,
+                $matches
+            )
+        ) {
             $id = (int) $matches[1];
 
             if ($method === 'GET') {
@@ -245,11 +310,16 @@ class Controller
 
     private function getUserById(int $id): void
     {
-        $user = $this->userGateway->findById($id);
+        $user =
+            $this->userGateway->findById($id);
 
         if (!$user) {
             http_response_code(404);
-            echo json_encode(['error' => 'Utente non trovato']);
+
+            echo json_encode([
+                'error' => 'Utente non trovato'
+            ]);
+
             return;
         }
 
@@ -269,9 +339,12 @@ class Controller
             !isset($data['email'])
         ) {
             http_response_code(400);
+
             echo json_encode([
-                'error' => 'Nome ed email sono obbligatori'
+                'error' =>
+                    'Nome ed email sono obbligatori'
             ]);
+
             return;
         }
 
@@ -300,9 +373,12 @@ class Controller
             !isset($data['email'])
         ) {
             http_response_code(400);
+
             echo json_encode([
-                'error' => 'Nome ed email sono obbligatori'
+                'error' =>
+                    'Nome ed email sono obbligatori'
             ]);
+
             return;
         }
 
@@ -337,11 +413,16 @@ class Controller
 
     private function getBoardById(int $id): void
     {
-        $board = $this->boardGateway->findById($id);
+        $board =
+            $this->boardGateway->findById($id);
 
         if (!$board) {
             http_response_code(404);
-            echo json_encode(['error' => 'Board non trovata']);
+
+            echo json_encode([
+                'error' => 'Board non trovata'
+            ]);
+
             return;
         }
 
@@ -360,9 +441,12 @@ class Controller
             !isset($data['name'])
         ) {
             http_response_code(400);
+
             echo json_encode([
-                'error' => 'Il nome della board è obbligatorio'
+                'error' =>
+                    'Il nome della board è obbligatorio'
             ]);
+
             return;
         }
 
@@ -389,9 +473,12 @@ class Controller
             !isset($data['name'])
         ) {
             http_response_code(400);
+
             echo json_encode([
-                'error' => 'Il nome della board è obbligatorio'
+                'error' =>
+                    'Il nome della board è obbligatorio'
             ]);
+
             return;
         }
 
@@ -416,28 +503,43 @@ class Controller
 
     // BOARD MEMBERS
 
-    private function getBoardMembers(int $boardId): void
-    {
-        if (!$this->boardGateway->findById($boardId)) {
+    private function getBoardMembers(
+        int $boardId
+    ): void {
+        if (
+            !$this->boardGateway->findById(
+                $boardId
+            )
+        ) {
             http_response_code(404);
+
             echo json_encode([
                 'error' => 'Board non trovata'
             ]);
+
             return;
         }
 
         echo json_encode(
-            $this->boardMemberGateway->findByBoardId($boardId)
+            $this->boardMemberGateway
+                ->findByBoardId($boardId)
         );
     }
 
-    private function addBoardMember(int $boardId): void
-    {
-        if (!$this->boardGateway->findById($boardId)) {
+    private function addBoardMember(
+        int $boardId
+    ): void {
+        if (
+            !$this->boardGateway->findById(
+                $boardId
+            )
+        ) {
             http_response_code(404);
+
             echo json_encode([
                 'error' => 'Board non trovata'
             ]);
+
             return;
         }
 
@@ -451,27 +553,45 @@ class Controller
             !isset($data['user_id'])
         ) {
             http_response_code(400);
+
             echo json_encode([
-                'error' => 'user_id è obbligatorio'
+                'error' =>
+                    'user_id è obbligatorio'
             ]);
+
             return;
         }
 
-        $userId = (int) $data['user_id'];
+        $userId =
+            (int) $data['user_id'];
 
-        if (!$this->userGateway->findById($userId)) {
+        if (
+            !$this->userGateway->findById(
+                $userId
+            )
+        ) {
             http_response_code(404);
+
             echo json_encode([
                 'error' => 'Utente non trovato'
             ]);
+
             return;
         }
 
-        if ($this->boardMemberGateway->isMember($boardId, $userId)) {
+        if (
+            $this->boardMemberGateway->isMember(
+                $boardId,
+                $userId
+            )
+        ) {
             http_response_code(409);
+
             echo json_encode([
-                'error' => 'Utente già membro della board'
+                'error' =>
+                    'Utente già membro della board'
             ]);
+
             return;
         }
 
@@ -483,7 +603,8 @@ class Controller
         http_response_code(201);
 
         echo json_encode([
-            'message' => 'Membro aggiunto alla board'
+            'message' =>
+                'Membro aggiunto alla board'
         ]);
     }
 
@@ -491,29 +612,56 @@ class Controller
         int $boardId,
         int $userId
     ): void {
-        if (!$this->boardGateway->findById($boardId)) {
+        if (
+            !$this->boardGateway->findById(
+                $boardId
+            )
+        ) {
             http_response_code(404);
+
             echo json_encode([
                 'error' => 'Board non trovata'
             ]);
+
             return;
         }
 
-        if (!$this->boardMemberGateway->isMember($boardId, $userId)) {
+        if (
+            !$this->boardMemberGateway->isMember(
+                $boardId,
+                $userId
+            )
+        ) {
             http_response_code(404);
+
             echo json_encode([
-                'error' => 'Utente non membro della board'
+                'error' =>
+                    'Utente non membro della board'
             ]);
+
             return;
         }
 
-        $this->boardMemberGateway->removeMember(
-            $boardId,
-            $userId
-        );
+        /*
+         * Prima di rimuovere l'utente dalla board,
+         * eliminiamo tutte le sue assegnazioni
+         * alle card appartenenti a questa board.
+         */
+        $this->cardAssignmentGateway
+            ->removeAssignmentsForBoardMember(
+                $boardId,
+                $userId
+            );
+
+        $this->boardMemberGateway
+            ->removeMember(
+                $boardId,
+                $userId
+            );
 
         echo json_encode([
-            'message' => 'Membro rimosso dalla board'
+            'message' =>
+                'Membro rimosso dalla board'
         ]);
     }
 
@@ -526,15 +674,21 @@ class Controller
         );
     }
 
-    private function getListById(int $id): void
-    {
-        $list = $this->boardListGateway->findById($id);
+    private function getListById(
+        int $id
+    ): void {
+        $list =
+            $this->boardListGateway->findById(
+                $id
+            );
 
         if (!$list) {
             http_response_code(404);
+
             echo json_encode([
                 'error' => 'Lista non trovata'
             ]);
+
             return;
         }
 
@@ -555,9 +709,12 @@ class Controller
             !isset($data['position'])
         ) {
             http_response_code(400);
+
             echo json_encode([
-                'error' => 'board_id, title e position sono obbligatori'
+                'error' =>
+                    'board_id, title e position sono obbligatori'
             ]);
+
             return;
         }
 
@@ -574,8 +731,9 @@ class Controller
         ]);
     }
 
-    private function updateList(int $id): void
-    {
+    private function updateList(
+        int $id
+    ): void {
         $data = json_decode(
             file_get_contents('php://input'),
             true
@@ -587,9 +745,12 @@ class Controller
             !isset($data['position'])
         ) {
             http_response_code(400);
+
             echo json_encode([
-                'error' => 'title e position sono obbligatori'
+                'error' =>
+                    'title e position sono obbligatori'
             ]);
+
             return;
         }
 
@@ -604,9 +765,12 @@ class Controller
         ]);
     }
 
-    private function deleteList(int $id): void
-    {
-        $this->boardListGateway->delete($id);
+    private function deleteList(
+        int $id
+    ): void {
+        $this->boardListGateway->delete(
+            $id
+        );
 
         echo json_encode([
             'message' => 'Lista eliminata'
@@ -622,15 +786,21 @@ class Controller
         );
     }
 
-    private function getCardById(int $id): void
-    {
-        $card = $this->cardGateway->findById($id);
+    private function getCardById(
+        int $id
+    ): void {
+        $card =
+            $this->cardGateway->findById(
+                $id
+            );
 
         if (!$card) {
             http_response_code(404);
+
             echo json_encode([
                 'error' => 'Card non trovata'
             ]);
+
             return;
         }
 
@@ -651,13 +821,17 @@ class Controller
             !isset($data['position'])
         ) {
             http_response_code(400);
+
             echo json_encode([
-                'error' => 'list_id, title e position sono obbligatori'
+                'error' =>
+                    'list_id, title e position sono obbligatori'
             ]);
+
             return;
         }
 
-        $description = $data['description'] ?? null;
+        $description =
+            $data['description'] ?? null;
 
         $id = $this->cardGateway->create(
             (int) $data['list_id'],
@@ -673,8 +847,9 @@ class Controller
         ]);
     }
 
-    private function updateCard(int $id): void
-    {
+    private function updateCard(
+        int $id
+    ): void {
         $data = json_decode(
             file_get_contents('php://input'),
             true
@@ -686,13 +861,17 @@ class Controller
             !isset($data['position'])
         ) {
             http_response_code(400);
+
             echo json_encode([
-                'error' => 'title e position sono obbligatori'
+                'error' =>
+                    'title e position sono obbligatori'
             ]);
+
             return;
         }
 
-        $description = $data['description'] ?? null;
+        $description =
+            $data['description'] ?? null;
 
         $this->cardGateway->update(
             $id,
@@ -706,9 +885,12 @@ class Controller
         ]);
     }
 
-    private function deleteCard(int $id): void
-    {
-        $this->cardGateway->delete($id);
+    private function deleteCard(
+        int $id
+    ): void {
+        $this->cardGateway->delete(
+            $id
+        );
 
         echo json_encode([
             'message' => 'Card eliminata'
@@ -717,9 +899,13 @@ class Controller
 
     // CARD MOVE
 
-    private function moveCard(int $cardId): void
-    {
-        $card = $this->cardGateway->findById($cardId);
+    private function moveCard(
+        int $cardId
+    ): void {
+        $card =
+            $this->cardGateway->findById(
+                $cardId
+            );
 
         if (!$card) {
             http_response_code(404);
@@ -744,22 +930,30 @@ class Controller
             http_response_code(400);
 
             echo json_encode([
-                'error' => 'list_id e position sono obbligatori'
+                'error' =>
+                    'list_id e position sono obbligatori'
             ]);
 
             return;
         }
 
-        $listId = (int) $data['list_id'];
-        $position = (int) $data['position'];
+        $listId =
+            (int) $data['list_id'];
 
-        $list = $this->boardListGateway->findById($listId);
+        $position =
+            (int) $data['position'];
+
+        $list =
+            $this->boardListGateway->findById(
+                $listId
+            );
 
         if (!$list) {
             http_response_code(404);
 
             echo json_encode([
-                'error' => 'Lista di destinazione non trovata'
+                'error' =>
+                    'Lista di destinazione non trovata'
             ]);
 
             return;
@@ -769,7 +963,8 @@ class Controller
             http_response_code(400);
 
             echo json_encode([
-                'error' => 'position deve essere maggiore o uguale a 1'
+                'error' =>
+                    'position deve essere maggiore o uguale a 1'
             ]);
 
             return;
@@ -788,32 +983,45 @@ class Controller
 
     // CARD ASSIGNMENTS
 
-    private function getCardAssignments(int $cardId): void
-    {
-        $card = $this->cardGateway->findById($cardId);
+    private function getCardAssignments(
+        int $cardId
+    ): void {
+        $card =
+            $this->cardGateway->findById(
+                $cardId
+            );
 
         if (!$card) {
             http_response_code(404);
+
             echo json_encode([
                 'error' => 'Card non trovata'
             ]);
+
             return;
         }
 
         echo json_encode(
-            $this->cardAssignmentGateway->findByCardId($cardId)
+            $this->cardAssignmentGateway
+                ->findByCardId($cardId)
         );
     }
 
-    private function addCardAssignment(int $cardId): void
-    {
-        $card = $this->cardGateway->findById($cardId);
+    private function addCardAssignment(
+        int $cardId
+    ): void {
+        $card =
+            $this->cardGateway->findById(
+                $cardId
+            );
 
         if (!$card) {
             http_response_code(404);
+
             echo json_encode([
                 'error' => 'Card non trovata'
             ]);
+
             return;
         }
 
@@ -827,41 +1035,62 @@ class Controller
             !isset($data['user_id'])
         ) {
             http_response_code(400);
+
             echo json_encode([
-                'error' => 'user_id è obbligatorio'
+                'error' =>
+                    'user_id è obbligatorio'
             ]);
+
             return;
         }
 
-        $userId = (int) $data['user_id'];
+        $userId =
+            (int) $data['user_id'];
 
-        if (!$this->userGateway->findById($userId)) {
+        if (
+            !$this->userGateway->findById(
+                $userId
+            )
+        ) {
             http_response_code(404);
+
             echo json_encode([
                 'error' => 'Utente non trovato'
             ]);
+
             return;
         }
 
-        $list = $this->boardListGateway->findById(
-            (int) $card['list_id']
-        );
+        $list =
+            $this->boardListGateway->findById(
+                (int) $card['list_id']
+            );
 
         if (!$list) {
             http_response_code(404);
+
             echo json_encode([
-                'error' => 'Lista della card non trovata'
+                'error' =>
+                    'Lista della card non trovata'
             ]);
+
             return;
         }
 
-        $boardId = (int) $list['board_id'];
+        $boardId =
+            (int) $list['board_id'];
 
-        if (!$this->boardMemberGateway->isMember($boardId, $userId)) {
+        if (
+            !$this->boardMemberGateway->isMember(
+                $boardId,
+                $userId
+            )
+        ) {
             http_response_code(400);
 
             echo json_encode([
-                'error' => 'L\'utente non è membro della board'
+                'error' =>
+                    'L\'utente non è membro della board'
             ]);
 
             return;
@@ -876,21 +1105,24 @@ class Controller
             http_response_code(409);
 
             echo json_encode([
-                'error' => 'Utente già assegnato alla card'
+                'error' =>
+                    'Utente già assegnato alla card'
             ]);
 
             return;
         }
 
-        $this->cardAssignmentGateway->addAssignment(
-            $cardId,
-            $userId
-        );
+        $this->cardAssignmentGateway
+            ->addAssignment(
+                $cardId,
+                $userId
+            );
 
         http_response_code(201);
 
         echo json_encode([
-            'message' => 'Utente assegnato alla card'
+            'message' =>
+                'Utente assegnato alla card'
         ]);
     }
 
@@ -898,7 +1130,10 @@ class Controller
         int $cardId,
         int $userId
     ): void {
-        $card = $this->cardGateway->findById($cardId);
+        $card =
+            $this->cardGateway->findById(
+                $cardId
+            );
 
         if (!$card) {
             http_response_code(404);
@@ -911,27 +1146,31 @@ class Controller
         }
 
         if (
-            !$this->cardAssignmentGateway->isAssigned(
-                $cardId,
-                $userId
-            )
+            !$this->cardAssignmentGateway
+                ->isAssigned(
+                    $cardId,
+                    $userId
+                )
         ) {
             http_response_code(404);
 
             echo json_encode([
-                'error' => 'Utente non assegnato alla card'
+                'error' =>
+                    'Utente non assegnato alla card'
             ]);
 
             return;
         }
 
-        $this->cardAssignmentGateway->removeAssignment(
-            $cardId,
-            $userId
-        );
+        $this->cardAssignmentGateway
+            ->removeAssignment(
+                $cardId,
+                $userId
+            );
 
         echo json_encode([
-            'message' => 'Assegnazione rimossa'
+            'message' =>
+                'Assegnazione rimossa'
         ]);
     }
 }
