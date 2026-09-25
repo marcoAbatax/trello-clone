@@ -4,65 +4,359 @@
 
 body {
     margin: 0;
-    font-family: Arial, sans-serif;
-    background-color: #f4f5f7;
+    font-family: Arial, Helvetica, sans-serif;
+    background: #f4f5f7;
+    color: #172b4d;
 }
 
+/* HEADER */
+
 header {
-    padding: 16px 24px;
-    background-color: white;
-    border-bottom: 1px solid #ddd;
+    background: #0c66e4;
+    color: white;
+    padding: 14px 24px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
 }
 
 header h1 {
     margin: 0;
+    font-size: 24px;
 }
+
+/* MAIN */
 
 main {
     padding: 24px;
 }
 
 #app {
-    max-width: 1200px;
+    max-width: 1400px;
     margin: 0 auto;
+}
+
+h2,
+h3,
+h4 {
+    color: #172b4d;
+}
+
+/* BOTTONI GENERALI */
+
+button {
+    border: none;
+    border-radius: 6px;
+    padding: 8px 12px;
+    font-size: 14px;
+    cursor: pointer;
+    transition: background-color 0.2s ease,
+                transform 0.1s ease;
+}
+
+button:hover {
+    transform: translateY(-1px);
+}
+
+button:active {
+    transform: translateY(0);
+}
+
+/* INPUT */
+
+input,
+textarea,
+select {
+    width: 100%;
+    padding: 9px 10px;
+    border: 1px solid #dfe1e6;
+    border-radius: 6px;
+    font-family: inherit;
+    font-size: 14px;
+    background: white;
+}
+
+input:focus,
+textarea:focus,
+select:focus {
+    outline: 2px solid #579dff;
+    border-color: transparent;
+}
+
+textarea {
+    resize: vertical;
+    min-height: 70px;
+}
+
+/* HOME - BOARD */
+
+.create-board-container {
+    display: flex;
+    gap: 10px;
+    max-width: 500px;
+    margin-bottom: 24px;
+}
+
+.create-board-container input {
+    flex: 1;
+}
+
+#create-board-button {
+    background: #0c66e4;
+    color: white;
+    white-space: nowrap;
+}
+
+#create-board-button:hover {
+    background: #0055cc;
 }
 
 .boards {
     display: flex;
     gap: 16px;
     flex-wrap: wrap;
+    margin-bottom: 32px;
 }
 
 .board {
-    width: 250px;
-    padding: 20px;
-    background-color: white;
-    border-radius: 8px;
-    border: 1px solid #ddd;
+    width: 260px;
+    min-height: 150px;
+    padding: 18px;
+    background: white;
+    border-radius: 10px;
+    box-shadow: 0 2px 8px rgba(9, 30, 66, 0.12);
+    border: 1px solid #dfe1e6;
 }
 
 .board h2 {
+    margin: 0 0 8px 0;
+    font-size: 18px;
+}
+
+.board p {
+    margin: 0 0 16px 0;
+    font-size: 13px;
+    color: #626f86;
+}
+
+.board button {
+    margin-right: 5px;
+    margin-bottom: 5px;
+}
+
+.open-board-button {
+    background: #0c66e4;
+    color: white;
+}
+
+.open-board-button:hover {
+    background: #0055cc;
+}
+
+.edit-board-button {
+    background: #dfe1e6;
+    color: #172b4d;
+}
+
+.edit-board-button:hover {
+    background: #c7cbd1;
+}
+
+.delete-board-button {
+    background: #ffeceb;
+    color: #ae2a19;
+}
+
+.delete-board-button:hover {
+    background: #ffd5d2;
+}
+
+/* UTENTI */
+
+.users-section {
+    margin-top: 30px;
+}
+
+.create-user-container {
+    display: flex;
+    gap: 10px;
+    max-width: 750px;
+    margin-bottom: 20px;
+}
+
+#create-user-button {
+    background: #0c66e4;
+    color: white;
+    white-space: nowrap;
+}
+
+#create-user-button:hover {
+    background: #0055cc;
+}
+
+.users {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.user {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    width: 250px;
+    background: white;
+    border: 1px solid #dfe1e6;
+    border-radius: 8px;
+    padding: 14px;
+    box-shadow: 0 1px 4px rgba(9, 30, 66, 0.08);
+}
+
+.user strong {
+    font-size: 15px;
+}
+
+.user span {
+    font-size: 13px;
+    color: #626f86;
+    word-break: break-word;
+}
+
+.edit-user-button {
+    background: #dfe1e6;
+    color: #172b4d;
+}
+
+.delete-user-button {
+    background: #ffeceb;
+    color: #ae2a19;
+}
+
+/* BOARD APERTA */
+
+#back-button {
+    background: #dfe1e6;
+    color: #172b4d;
+    margin-bottom: 18px;
+}
+
+#back-button:hover {
+    background: #c7cbd1;
+}
+
+/* MEMBRI BOARD */
+
+.board-members {
+    background: white;
+    padding: 16px;
+    border-radius: 10px;
+    margin: 16px 0 22px 0;
+    border: 1px solid #dfe1e6;
+    box-shadow: 0 1px 5px rgba(9, 30, 66, 0.08);
+}
+
+.board-members h3 {
     margin-top: 0;
 }
 
-.lists {
+.members {
     display: flex;
-    gap: 20px;
-    align-items: flex-start;
-    overflow-x: auto;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-bottom: 14px;
 }
 
-.list {
-    width: 280px;
-    min-width: 280px;
-    padding: 16px;
-    background-color: #ebecf0;
+.member {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding: 10px 12px;
+    background: #f7f8f9;
+    border: 1px solid #dfe1e6;
     border-radius: 8px;
 }
 
-.list h3 {
-    margin-top: 0;
+.member strong {
+    font-size: 14px;
 }
+
+.member span {
+    font-size: 12px;
+    color: #626f86;
+}
+
+.remove-member-button {
+    margin-top: 6px;
+    background: #ffeceb;
+    color: #ae2a19;
+}
+
+.remove-member-button:hover {
+    background: #ffd5d2;
+}
+
+.add-member-container {
+    display: flex;
+    gap: 8px;
+    max-width: 500px;
+}
+
+#add-member-button {
+    background: #0c66e4;
+    color: white;
+    white-space: nowrap;
+}
+
+#add-member-button:hover {
+    background: #0055cc;
+}
+
+/* LISTE */
+
+.lists {
+    display: flex;
+    gap: 16px;
+    align-items: flex-start;
+    overflow-x: auto;
+    padding-bottom: 20px;
+}
+
+.list {
+    width: 290px;
+    min-width: 290px;
+    background: #ebecf0;
+    padding: 12px;
+    border-radius: 10px;
+    box-shadow: 0 1px 4px rgba(9, 30, 66, 0.12);
+}
+
+.list h3 {
+    margin: 4px 0 12px 0;
+    font-size: 16px;
+}
+
+.edit-list-button,
+.delete-list-button {
+    margin-bottom: 10px;
+}
+
+.edit-list-button {
+    background: #dfe1e6;
+    color: #172b4d;
+}
+
+.edit-list-button:hover {
+    background: #c7cbd1;
+}
+
+.delete-list-button {
+    background: #ffeceb;
+    color: #ae2a19;
+}
+
+.delete-list-button:hover {
+    background: #ffd5d2;
+}
+
+/* CARD */
 
 .cards {
     display: flex;
@@ -71,58 +365,60 @@ main {
 }
 
 .card {
+    background: white;
+    border-radius: 8px;
     padding: 12px;
-    background-color: white;
-    border-radius: 6px;
-    border: 1px solid #ddd;
+    box-shadow: 0 1px 3px rgba(9, 30, 66, 0.2);
+    cursor: grab;
+    transition: box-shadow 0.2s ease,
+                transform 0.15s ease;
+}
+
+.card:hover {
+    box-shadow: 0 3px 8px rgba(9, 30, 66, 0.22);
+}
+
+.card:active {
+    cursor: grabbing;
 }
 
 .card h4 {
     margin: 0 0 8px 0;
+    font-size: 15px;
 }
 
 .card p {
-    margin: 0;
+    margin: 0 0 10px 0;
+    font-size: 13px;
+    line-height: 1.4;
+    color: #44546f;
 }
 
-.add-card-button {
-    width: 100%;
-    margin-top: 12px;
-    padding: 10px;
-    border: none;
-    background: transparent;
-    text-align: left;
-    cursor: pointer;
-    border-radius: 6px;
+.edit-card-button,
+.delete-card-button {
+    margin-top: 6px;
+    margin-right: 4px;
 }
 
-.add-card-button:hover {
-    background-color: #ff0000;
+.edit-card-button {
+    background: #dfe1e6;
+    color: #172b4d;
 }
 
-.board-members {
-    margin: 20px 0;
+.edit-card-button:hover {
+    background: #c7cbd1;
 }
 
-.members {
-    display: flex;
-    gap: 10px;
-    flex-wrap: wrap;
+.delete-card-button {
+    background: #ffeceb;
+    color: #ae2a19;
 }
 
-.member {
-    display: flex;
-    flex-direction: column;
-    padding: 10px 14px;
-    background-color: white;
-    border: 1px solid #ddd;
-    border-radius: 8px;
+.delete-card-button:hover {
+    background: #ffd5d2;
 }
 
-.member span {
-    margin-top: 4px;
-    font-size: 12px;
-}
+/* ASSEGNAZIONI CARD */
 
 .card-assignments {
     display: flex;
@@ -132,32 +428,172 @@ main {
 }
 
 .card-assignment {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    background: #dfe1e6;
+    border-radius: 14px;
     padding: 4px 8px;
-    background-color: #e4e6ea;
-    border-radius: 12px;
     font-size: 12px;
+}
+
+.remove-assignment-button {
+    padding: 0;
+    background: transparent;
+    color: #626f86;
+    font-size: 16px;
+    line-height: 1;
+}
+
+.remove-assignment-button:hover {
+    color: #ae2a19;
+    background: transparent;
+    transform: none;
 }
 
 .assignment-controls {
     display: flex;
     gap: 6px;
-    margin: 8px 0;
+    margin: 10px 0;
 }
 
 .assignment-select {
     flex: 1;
     min-width: 0;
+    font-size: 12px;
 }
 
-.card-assignment {
-    display: inline-flex;
-    align-items: center;
-    gap: 4px;
+.add-assignment-button {
+    background: #0c66e4;
+    color: white;
 }
 
-.remove-assignment-button {
-    padding: 0 4px;
-    border: none;
+.add-assignment-button:hover {
+    background: #0055cc;
+}
+
+/* AGGIUNTA CARD */
+
+.add-card-button {
+    width: 100%;
+    margin-top: 12px;
+    padding: 10px;
     background: transparent;
-    cursor: pointer;
+    text-align: left;
+    color: #44546f;
+}
+
+.add-card-button:hover {
+    background: #dcdfe4;
+    transform: none;
+}
+
+.add-card-form {
+    margin-top: 10px;
+}
+
+.add-card-form input,
+.add-card-form textarea {
+    margin-bottom: 8px;
+}
+
+.save-card-button {
+    background: #0c66e4;
+    color: white;
+}
+
+.save-card-button:hover {
+    background: #0055cc;
+}
+
+/* NUOVA LISTA */
+
+.new-list-container {
+    min-width: 260px;
+    width: 260px;
+}
+
+#add-list-button {
+    width: 100%;
+    background: rgba(255, 255, 255, 0.85);
+    color: #172b4d;
+    padding: 12px;
+}
+
+#add-list-button:hover {
+    background: white;
+}
+
+#add-list-form {
+    margin-top: 10px;
+    background: #ebecf0;
+    padding: 12px;
+    border-radius: 8px;
+}
+
+#list-title-input {
+    margin-bottom: 8px;
+}
+
+#save-list-button {
+    background: #0c66e4;
+    color: white;
+}
+
+#save-list-button:hover {
+    background: #0055cc;
+}
+
+/* SEPARATORE */
+
+hr {
+    border: 0;
+    border-top: 1px solid #dfe1e6;
+    margin: 32px 0;
+}
+
+/* SCROLLBAR LISTE */
+
+.lists::-webkit-scrollbar {
+    height: 10px;
+}
+
+.lists::-webkit-scrollbar-thumb {
+    background: #c7cbd1;
+    border-radius: 10px;
+}
+
+.lists::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+/* RESPONSIVE */
+
+@media (max-width: 768px) {
+
+    main {
+        padding: 16px;
+    }
+
+    .create-board-container,
+    .create-user-container,
+    .add-member-container {
+        flex-direction: column;
+        max-width: 100%;
+    }
+
+    .boards,
+    .users {
+        flex-direction: column;
+    }
+
+    .board,
+    .user {
+        width: 100%;
+    }
+
+    .list {
+        width: 270px;
+        min-width: 270px;
+    }
 }
