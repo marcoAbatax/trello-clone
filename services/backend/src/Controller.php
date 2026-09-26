@@ -22,30 +22,55 @@ class Controller
         $database = new Database();
         $connection = $database->getConnection();
 
-        $this->userGateway = new UserGateway($connection);
-        $this->boardGateway = new BoardGateway($connection);
-        $this->boardListGateway = new BoardListGateway($connection);
-        $this->cardGateway = new CardGateway($connection);
-        $this->boardMemberGateway = new BoardMemberGateway($connection);
-        $this->cardAssignmentGateway = new CardAssignmentGateway($connection);
+        $this->userGateway =
+            new UserGateway($connection);
+
+        $this->boardGateway =
+            new BoardGateway($connection);
+
+        $this->boardListGateway =
+            new BoardListGateway($connection);
+
+        $this->cardGateway =
+            new CardGateway($connection);
+
+        $this->boardMemberGateway =
+            new BoardMemberGateway($connection);
+
+        $this->cardAssignmentGateway =
+            new CardAssignmentGateway($connection);
     }
+
+
+    /* =========================================================
+       ROUTING
+       ========================================================= */
 
     public function handleRequest(): void
     {
-        $method = $_SERVER['REQUEST_METHOD'];
+        $method =
+            $_SERVER['REQUEST_METHOD'];
+
         $path = parse_url(
             $_SERVER['REQUEST_URI'],
             PHP_URL_PATH
         );
 
-        // USERS
 
-        if ($method === 'GET' && $path === '/users') {
+        /* USERS */
+
+        if (
+            $method === 'GET' &&
+            $path === '/users'
+        ) {
             $this->getUsers();
             return;
         }
 
-        if ($method === 'POST' && $path === '/users') {
+        if (
+            $method === 'POST' &&
+            $path === '/users'
+        ) {
             $this->createUser();
             return;
         }
@@ -75,7 +100,8 @@ class Controller
             }
         }
 
-        // BOARD MEMBERS
+
+        /* BOARD MEMBERS */
 
         if (
             $method === 'GET' &&
@@ -120,14 +146,21 @@ class Controller
             return;
         }
 
-        // BOARDS
 
-        if ($method === 'GET' && $path === '/boards') {
+        /* BOARDS */
+
+        if (
+            $method === 'GET' &&
+            $path === '/boards'
+        ) {
             $this->getBoards();
             return;
         }
 
-        if ($method === 'POST' && $path === '/boards') {
+        if (
+            $method === 'POST' &&
+            $path === '/boards'
+        ) {
             $this->createBoard();
             return;
         }
@@ -157,14 +190,21 @@ class Controller
             }
         }
 
-        // LISTS
 
-        if ($method === 'GET' && $path === '/lists') {
+        /* LISTS */
+
+        if (
+            $method === 'GET' &&
+            $path === '/lists'
+        ) {
             $this->getLists();
             return;
         }
 
-        if ($method === 'POST' && $path === '/lists') {
+        if (
+            $method === 'POST' &&
+            $path === '/lists'
+        ) {
             $this->createList();
             return;
         }
@@ -194,7 +234,8 @@ class Controller
             }
         }
 
-        // CARD ASSIGNMENTS
+
+        /* CARD ASSIGNMENTS */
 
         if (
             $method === 'GET' &&
@@ -239,7 +280,8 @@ class Controller
             return;
         }
 
-        // CARD MOVE
+
+        /* CARD MOVE */
 
         if (
             $method === 'PUT' &&
@@ -255,14 +297,21 @@ class Controller
             return;
         }
 
-        // CARDS
 
-        if ($method === 'GET' && $path === '/cards') {
+        /* CARDS */
+
+        if (
+            $method === 'GET' &&
+            $path === '/cards'
+        ) {
             $this->getCards();
             return;
         }
 
-        if ($method === 'POST' && $path === '/cards') {
+        if (
+            $method === 'POST' &&
+            $path === '/cards'
+        ) {
             $this->createCard();
             return;
         }
@@ -292,14 +341,98 @@ class Controller
             }
         }
 
-        http_response_code(404);
+
+        $this->sendError(
+            404,
+            'Endpoint non trovato'
+        );
+    }
+
+
+    /* =========================================================
+       UTILITY
+       ========================================================= */
+
+    private function getJsonBody(): ?array
+    {
+        $data = json_decode(
+            file_get_contents('php://input'),
+            true
+        );
+
+        if (!is_array($data)) {
+            return null;
+        }
+
+        return $data;
+    }
+
+
+    private function sendError(
+        int $statusCode,
+        string $message
+    ): void {
+        http_response_code($statusCode);
 
         echo json_encode([
-            'error' => 'Endpoint non trovato'
+            'error' => $message
         ]);
     }
 
-    // USERS
+
+    private function sendMessage(
+        string $message
+    ): void {
+        echo json_encode([
+            'message' => $message
+        ]);
+    }
+
+
+    private function isValidNonEmptyString(
+        mixed $value,
+        int $maxLength
+    ): bool {
+        return
+            is_string($value) &&
+            trim($value) !== '' &&
+            mb_strlen(trim($value)) <= $maxLength;
+    }
+
+
+    private function isValidPositiveInteger(
+        mixed $value
+    ): bool {
+        if (is_int($value)) {
+            return $value >= 1;
+        }
+
+        if (
+            is_string($value) &&
+            ctype_digit($value)
+        ) {
+            return (int) $value >= 1;
+        }
+
+        return false;
+    }
+
+
+    private function isDuplicateEntryException(
+        PDOException $exception
+    ): bool {
+        return
+            $exception->getCode() === '23000' ||
+            (
+                isset($exception->errorInfo[1]) &&
+                (int) $exception->errorInfo[1] === 1062
+            );
+    }
+
+
+    /* =========================================================
+       USERS
+       ========================================================= */
 
     private function getUsers(): void
     {
@@ -308,50 +441,101 @@ class Controller
         );
     }
 
-    private function getUserById(int $id): void
-    {
+
+    private function getUserById(
+        int $id
+    ): void {
         $user =
             $this->userGateway->findById($id);
 
         if (!$user) {
-            http_response_code(404);
-
-            echo json_encode([
-                'error' => 'Utente non trovato'
-            ]);
-
+            $this->sendError(
+                404,
+                'Utente non trovato'
+            );
             return;
         }
 
         echo json_encode($user);
     }
 
+
     private function createUser(): void
     {
-        $data = json_decode(
-            file_get_contents('php://input'),
-            true
-        );
+        $data =
+            $this->getJsonBody();
 
-        if (
-            !is_array($data) ||
-            !isset($data['name']) ||
-            !isset($data['email'])
-        ) {
-            http_response_code(400);
-
-            echo json_encode([
-                'error' =>
-                    'Nome ed email sono obbligatori'
-            ]);
-
+        if ($data === null) {
+            $this->sendError(
+                400,
+                'JSON non valido'
+            );
             return;
         }
 
-        $id = $this->userGateway->create(
-            $data['name'],
-            $data['email']
-        );
+        if (
+            !array_key_exists('name', $data) ||
+            !array_key_exists('email', $data)
+        ) {
+            $this->sendError(
+                400,
+                'Nome ed email sono obbligatori'
+            );
+            return;
+        }
+
+        if (
+            !$this->isValidNonEmptyString(
+                $data['name'],
+                100
+            )
+        ) {
+            $this->sendError(
+                400,
+                'Il nome deve essere una stringa non vuota di massimo 100 caratteri'
+            );
+            return;
+        }
+
+        if (
+            !is_string($data['email']) ||
+            trim($data['email']) === '' ||
+            mb_strlen(trim($data['email'])) > 255 ||
+            !filter_var(
+                trim($data['email']),
+                FILTER_VALIDATE_EMAIL
+            )
+        ) {
+            $this->sendError(
+                400,
+                'Email non valida'
+            );
+            return;
+        }
+
+        try {
+            $id =
+                $this->userGateway->create(
+                    trim($data['name']),
+                    trim($data['email'])
+                );
+
+        } catch (PDOException $exception) {
+
+            if (
+                $this->isDuplicateEntryException(
+                    $exception
+                )
+            ) {
+                $this->sendError(
+                    409,
+                    'Email già utilizzata'
+                );
+                return;
+            }
+
+            throw $exception;
+        }
 
         http_response_code(201);
 
@@ -360,49 +544,125 @@ class Controller
         ]);
     }
 
-    private function updateUser(int $id): void
-    {
-        $data = json_decode(
-            file_get_contents('php://input'),
-            true
-        );
 
+    private function updateUser(
+        int $id
+    ): void {
         if (
-            !is_array($data) ||
-            !isset($data['name']) ||
-            !isset($data['email'])
+            !$this->userGateway->findById($id)
         ) {
-            http_response_code(400);
-
-            echo json_encode([
-                'error' =>
-                    'Nome ed email sono obbligatori'
-            ]);
-
+            $this->sendError(
+                404,
+                'Utente non trovato'
+            );
             return;
         }
 
-        $this->userGateway->update(
-            $id,
-            $data['name'],
-            $data['email']
-        );
+        $data =
+            $this->getJsonBody();
 
-        echo json_encode([
-            'message' => 'Utente aggiornato'
-        ]);
+        if ($data === null) {
+            $this->sendError(
+                400,
+                'JSON non valido'
+            );
+            return;
+        }
+
+        if (
+            !array_key_exists('name', $data) ||
+            !array_key_exists('email', $data)
+        ) {
+            $this->sendError(
+                400,
+                'Nome ed email sono obbligatori'
+            );
+            return;
+        }
+
+        if (
+            !$this->isValidNonEmptyString(
+                $data['name'],
+                100
+            )
+        ) {
+            $this->sendError(
+                400,
+                'Il nome deve essere una stringa non vuota di massimo 100 caratteri'
+            );
+            return;
+        }
+
+        if (
+            !is_string($data['email']) ||
+            trim($data['email']) === '' ||
+            mb_strlen(trim($data['email'])) > 255 ||
+            !filter_var(
+                trim($data['email']),
+                FILTER_VALIDATE_EMAIL
+            )
+        ) {
+            $this->sendError(
+                400,
+                'Email non valida'
+            );
+            return;
+        }
+
+        try {
+            $this->userGateway->update(
+                $id,
+                trim($data['name']),
+                trim($data['email'])
+            );
+
+        } catch (PDOException $exception) {
+
+            if (
+                $this->isDuplicateEntryException(
+                    $exception
+                )
+            ) {
+                $this->sendError(
+                    409,
+                    'Email già utilizzata'
+                );
+                return;
+            }
+
+            throw $exception;
+        }
+
+        $this->sendMessage(
+            'Utente aggiornato'
+        );
     }
 
-    private function deleteUser(int $id): void
-    {
+
+    private function deleteUser(
+        int $id
+    ): void {
+        if (
+            !$this->userGateway->findById($id)
+        ) {
+            $this->sendError(
+                404,
+                'Utente non trovato'
+            );
+            return;
+        }
+
         $this->userGateway->delete($id);
 
-        echo json_encode([
-            'message' => 'Utente eliminato'
-        ]);
+        $this->sendMessage(
+            'Utente eliminato'
+        );
     }
 
-    // BOARDS
+
+    /* =========================================================
+       BOARDS
+       ========================================================= */
 
     private function getBoards(): void
     {
@@ -411,48 +671,56 @@ class Controller
         );
     }
 
-    private function getBoardById(int $id): void
-    {
+
+    private function getBoardById(
+        int $id
+    ): void {
         $board =
             $this->boardGateway->findById($id);
 
         if (!$board) {
-            http_response_code(404);
-
-            echo json_encode([
-                'error' => 'Board non trovata'
-            ]);
-
+            $this->sendError(
+                404,
+                'Board non trovata'
+            );
             return;
         }
 
         echo json_encode($board);
     }
 
+
     private function createBoard(): void
     {
-        $data = json_decode(
-            file_get_contents('php://input'),
-            true
-        );
+        $data =
+            $this->getJsonBody();
 
-        if (
-            !is_array($data) ||
-            !isset($data['name'])
-        ) {
-            http_response_code(400);
-
-            echo json_encode([
-                'error' =>
-                    'Il nome della board è obbligatorio'
-            ]);
-
+        if ($data === null) {
+            $this->sendError(
+                400,
+                'JSON non valido'
+            );
             return;
         }
 
-        $id = $this->boardGateway->create(
-            $data['name']
-        );
+        if (
+            !array_key_exists('name', $data) ||
+            !$this->isValidNonEmptyString(
+                $data['name'],
+                150
+            )
+        ) {
+            $this->sendError(
+                400,
+                'Il nome della board deve essere una stringa non vuota di massimo 150 caratteri'
+            );
+            return;
+        }
+
+        $id =
+            $this->boardGateway->create(
+                trim($data['name'])
+            );
 
         http_response_code(201);
 
@@ -461,62 +729,92 @@ class Controller
         ]);
     }
 
-    private function updateBoard(int $id): void
-    {
-        $data = json_decode(
-            file_get_contents('php://input'),
-            true
-        );
+
+    private function updateBoard(
+        int $id
+    ): void {
+        if (
+            !$this->boardGateway->findById($id)
+        ) {
+            $this->sendError(
+                404,
+                'Board non trovata'
+            );
+            return;
+        }
+
+        $data =
+            $this->getJsonBody();
+
+        if ($data === null) {
+            $this->sendError(
+                400,
+                'JSON non valido'
+            );
+            return;
+        }
 
         if (
-            !is_array($data) ||
-            !isset($data['name'])
+            !array_key_exists('name', $data) ||
+            !$this->isValidNonEmptyString(
+                $data['name'],
+                150
+            )
         ) {
-            http_response_code(400);
-
-            echo json_encode([
-                'error' =>
-                    'Il nome della board è obbligatorio'
-            ]);
-
+            $this->sendError(
+                400,
+                'Il nome della board deve essere una stringa non vuota di massimo 150 caratteri'
+            );
             return;
         }
 
         $this->boardGateway->update(
             $id,
-            $data['name']
+            trim($data['name'])
         );
 
-        echo json_encode([
-            'message' => 'Board aggiornata'
-        ]);
+        $this->sendMessage(
+            'Board aggiornata'
+        );
     }
 
-    private function deleteBoard(int $id): void
-    {
+
+    private function deleteBoard(
+        int $id
+    ): void {
+        if (
+            !$this->boardGateway->findById($id)
+        ) {
+            $this->sendError(
+                404,
+                'Board non trovata'
+            );
+            return;
+        }
+
         $this->boardGateway->delete($id);
 
-        echo json_encode([
-            'message' => 'Board eliminata'
-        ]);
+        $this->sendMessage(
+            'Board eliminata'
+        );
     }
 
-    // BOARD MEMBERS
+
+    /* =========================================================
+       BOARD MEMBERS
+       ========================================================= */
 
     private function getBoardMembers(
         int $boardId
     ): void {
         if (
-            !$this->boardGateway->findById(
-                $boardId
-            )
+            !$this->boardGateway
+                ->findById($boardId)
         ) {
-            http_response_code(404);
-
-            echo json_encode([
-                'error' => 'Board non trovata'
-            ]);
-
+            $this->sendError(
+                404,
+                'Board non trovata'
+            );
             return;
         }
 
@@ -526,39 +824,38 @@ class Controller
         );
     }
 
+
     private function addBoardMember(
         int $boardId
     ): void {
         if (
-            !$this->boardGateway->findById(
-                $boardId
-            )
+            !$this->boardGateway
+                ->findById($boardId)
         ) {
-            http_response_code(404);
-
-            echo json_encode([
-                'error' => 'Board non trovata'
-            ]);
-
+            $this->sendError(
+                404,
+                'Board non trovata'
+            );
             return;
         }
 
-        $data = json_decode(
-            file_get_contents('php://input'),
-            true
-        );
+        $data =
+            $this->getJsonBody();
 
         if (
-            !is_array($data) ||
-            !isset($data['user_id'])
+            $data === null ||
+            !array_key_exists(
+                'user_id',
+                $data
+            ) ||
+            !$this->isValidPositiveInteger(
+                $data['user_id']
+            )
         ) {
-            http_response_code(400);
-
-            echo json_encode([
-                'error' =>
-                    'user_id è obbligatorio'
-            ]);
-
+            $this->sendError(
+                400,
+                'user_id deve essere un intero positivo'
+            );
             return;
         }
 
@@ -566,86 +863,77 @@ class Controller
             (int) $data['user_id'];
 
         if (
-            !$this->userGateway->findById(
-                $userId
-            )
+            !$this->userGateway
+                ->findById($userId)
         ) {
-            http_response_code(404);
-
-            echo json_encode([
-                'error' => 'Utente non trovato'
-            ]);
-
+            $this->sendError(
+                404,
+                'Utente non trovato'
+            );
             return;
         }
 
         if (
-            $this->boardMemberGateway->isMember(
-                $boardId,
-                $userId
-            )
+            $this->boardMemberGateway
+                ->isMember(
+                    $boardId,
+                    $userId
+                )
         ) {
-            http_response_code(409);
-
-            echo json_encode([
-                'error' =>
-                    'Utente già membro della board'
-            ]);
-
+            $this->sendError(
+                409,
+                'Utente già membro della board'
+            );
             return;
         }
 
-        $this->boardMemberGateway->addMember(
-            $boardId,
-            $userId
-        );
+        $this->boardMemberGateway
+            ->addMember(
+                $boardId,
+                $userId
+            );
 
         http_response_code(201);
 
-        echo json_encode([
-            'message' =>
-                'Membro aggiunto alla board'
-        ]);
+        $this->sendMessage(
+            'Membro aggiunto alla board'
+        );
     }
+
 
     private function removeBoardMember(
         int $boardId,
         int $userId
     ): void {
         if (
-            !$this->boardGateway->findById(
-                $boardId
-            )
+            !$this->boardGateway
+                ->findById($boardId)
         ) {
-            http_response_code(404);
-
-            echo json_encode([
-                'error' => 'Board non trovata'
-            ]);
-
+            $this->sendError(
+                404,
+                'Board non trovata'
+            );
             return;
         }
 
         if (
-            !$this->boardMemberGateway->isMember(
-                $boardId,
-                $userId
-            )
+            !$this->boardMemberGateway
+                ->isMember(
+                    $boardId,
+                    $userId
+                )
         ) {
-            http_response_code(404);
-
-            echo json_encode([
-                'error' =>
-                    'Utente non membro della board'
-            ]);
-
+            $this->sendError(
+                404,
+                'Utente non membro della board'
+            );
             return;
         }
 
         /*
-         * Prima di rimuovere l'utente dalla board,
-         * eliminiamo tutte le sue assegnazioni
-         * alle card appartenenti a questa board.
+         * Prima di rimuovere l'utente dalla board
+         * vengono eliminate le sue assegnazioni
+         * alle card appartenenti alla stessa board.
          */
         $this->cardAssignmentGateway
             ->removeAssignmentsForBoardMember(
@@ -659,13 +947,15 @@ class Controller
                 $userId
             );
 
-        echo json_encode([
-            'message' =>
-                'Membro rimosso dalla board'
-        ]);
+        $this->sendMessage(
+            'Membro rimosso dalla board'
+        );
     }
 
-    // LISTS
+
+    /* =========================================================
+       LISTS
+       ========================================================= */
 
     private function getLists(): void
     {
@@ -674,55 +964,117 @@ class Controller
         );
     }
 
+
     private function getListById(
         int $id
     ): void {
         $list =
-            $this->boardListGateway->findById(
-                $id
-            );
+            $this->boardListGateway
+                ->findById($id);
 
         if (!$list) {
-            http_response_code(404);
-
-            echo json_encode([
-                'error' => 'Lista non trovata'
-            ]);
-
+            $this->sendError(
+                404,
+                'Lista non trovata'
+            );
             return;
         }
 
         echo json_encode($list);
     }
 
+
     private function createList(): void
     {
-        $data = json_decode(
-            file_get_contents('php://input'),
-            true
-        );
+        $data =
+            $this->getJsonBody();
 
-        if (
-            !is_array($data) ||
-            !isset($data['board_id']) ||
-            !isset($data['title']) ||
-            !isset($data['position'])
-        ) {
-            http_response_code(400);
-
-            echo json_encode([
-                'error' =>
-                    'board_id, title e position sono obbligatori'
-            ]);
-
+        if ($data === null) {
+            $this->sendError(
+                400,
+                'JSON non valido'
+            );
             return;
         }
 
-        $id = $this->boardListGateway->create(
-            (int) $data['board_id'],
-            $data['title'],
-            (int) $data['position']
-        );
+        if (
+            !array_key_exists(
+                'board_id',
+                $data
+            ) ||
+            !array_key_exists(
+                'title',
+                $data
+            ) ||
+            !array_key_exists(
+                'position',
+                $data
+            )
+        ) {
+            $this->sendError(
+                400,
+                'board_id, title e position sono obbligatori'
+            );
+            return;
+        }
+
+        if (
+            !$this->isValidPositiveInteger(
+                $data['board_id']
+            )
+        ) {
+            $this->sendError(
+                400,
+                'board_id deve essere un intero positivo'
+            );
+            return;
+        }
+
+        if (
+            !$this->isValidNonEmptyString(
+                $data['title'],
+                150
+            )
+        ) {
+            $this->sendError(
+                400,
+                'Il titolo deve essere una stringa non vuota di massimo 150 caratteri'
+            );
+            return;
+        }
+
+        if (
+            !$this->isValidPositiveInteger(
+                $data['position']
+            )
+        ) {
+            $this->sendError(
+                400,
+                'position deve essere un intero maggiore o uguale a 1'
+            );
+            return;
+        }
+
+        $boardId =
+            (int) $data['board_id'];
+
+        if (
+            !$this->boardGateway
+                ->findById($boardId)
+        ) {
+            $this->sendError(
+                404,
+                'Board non trovata'
+            );
+            return;
+        }
+
+        $id =
+            $this->boardListGateway->create(
+                $boardId,
+                trim($data['title']),
+                (int) $data['position']
+            );
 
         http_response_code(201);
 
@@ -731,53 +1083,112 @@ class Controller
         ]);
     }
 
+
     private function updateList(
         int $id
     ): void {
-        $data = json_decode(
-            file_get_contents('php://input'),
-            true
-        );
+        if (
+            !$this->boardListGateway
+                ->findById($id)
+        ) {
+            $this->sendError(
+                404,
+                'Lista non trovata'
+            );
+            return;
+        }
+
+        $data =
+            $this->getJsonBody();
+
+        if ($data === null) {
+            $this->sendError(
+                400,
+                'JSON non valido'
+            );
+            return;
+        }
 
         if (
-            !is_array($data) ||
-            !isset($data['title']) ||
-            !isset($data['position'])
+            !array_key_exists(
+                'title',
+                $data
+            ) ||
+            !array_key_exists(
+                'position',
+                $data
+            )
         ) {
-            http_response_code(400);
+            $this->sendError(
+                400,
+                'title e position sono obbligatori'
+            );
+            return;
+        }
 
-            echo json_encode([
-                'error' =>
-                    'title e position sono obbligatori'
-            ]);
+        if (
+            !$this->isValidNonEmptyString(
+                $data['title'],
+                150
+            )
+        ) {
+            $this->sendError(
+                400,
+                'Il titolo deve essere una stringa non vuota di massimo 150 caratteri'
+            );
+            return;
+        }
 
+        if (
+            !$this->isValidPositiveInteger(
+                $data['position']
+            )
+        ) {
+            $this->sendError(
+                400,
+                'position deve essere un intero maggiore o uguale a 1'
+            );
             return;
         }
 
         $this->boardListGateway->update(
             $id,
-            $data['title'],
+            trim($data['title']),
             (int) $data['position']
         );
 
-        echo json_encode([
-            'message' => 'Lista aggiornata'
-        ]);
+        $this->sendMessage(
+            'Lista aggiornata'
+        );
     }
+
 
     private function deleteList(
         int $id
     ): void {
-        $this->boardListGateway->delete(
-            $id
-        );
+        if (
+            !$this->boardListGateway
+                ->findById($id)
+        ) {
+            $this->sendError(
+                404,
+                'Lista non trovata'
+            );
+            return;
+        }
 
-        echo json_encode([
-            'message' => 'Lista eliminata'
-        ]);
+        $this->boardListGateway
+            ->delete($id);
+
+        $this->sendMessage(
+            'Lista eliminata'
+        );
     }
 
-    // CARDS
+
+    /* =========================================================
+       CARDS
+       ========================================================= */
 
     private function getCards(): void
     {
@@ -786,59 +1197,132 @@ class Controller
         );
     }
 
+
     private function getCardById(
         int $id
     ): void {
         $card =
-            $this->cardGateway->findById(
-                $id
-            );
+            $this->cardGateway
+                ->findById($id);
 
         if (!$card) {
-            http_response_code(404);
-
-            echo json_encode([
-                'error' => 'Card non trovata'
-            ]);
-
+            $this->sendError(
+                404,
+                'Card non trovata'
+            );
             return;
         }
 
         echo json_encode($card);
     }
 
+
     private function createCard(): void
     {
-        $data = json_decode(
-            file_get_contents('php://input'),
-            true
-        );
+        $data =
+            $this->getJsonBody();
+
+        if ($data === null) {
+            $this->sendError(
+                400,
+                'JSON non valido'
+            );
+            return;
+        }
 
         if (
-            !is_array($data) ||
-            !isset($data['list_id']) ||
-            !isset($data['title']) ||
-            !isset($data['position'])
+            !array_key_exists(
+                'list_id',
+                $data
+            ) ||
+            !array_key_exists(
+                'title',
+                $data
+            ) ||
+            !array_key_exists(
+                'position',
+                $data
+            )
         ) {
-            http_response_code(400);
+            $this->sendError(
+                400,
+                'list_id, title e position sono obbligatori'
+            );
+            return;
+        }
 
-            echo json_encode([
-                'error' =>
-                    'list_id, title e position sono obbligatori'
-            ]);
+        if (
+            !$this->isValidPositiveInteger(
+                $data['list_id']
+            )
+        ) {
+            $this->sendError(
+                400,
+                'list_id deve essere un intero positivo'
+            );
+            return;
+        }
 
+        if (
+            !$this->isValidNonEmptyString(
+                $data['title'],
+                150
+            )
+        ) {
+            $this->sendError(
+                400,
+                'Il titolo deve essere una stringa non vuota di massimo 150 caratteri'
+            );
+            return;
+        }
+
+        if (
+            !$this->isValidPositiveInteger(
+                $data['position']
+            )
+        ) {
+            $this->sendError(
+                400,
+                'position deve essere un intero maggiore o uguale a 1'
+            );
             return;
         }
 
         $description =
             $data['description'] ?? null;
 
-        $id = $this->cardGateway->create(
-            (int) $data['list_id'],
-            $data['title'],
-            $description,
-            (int) $data['position']
-        );
+        if (
+            $description !== null &&
+            !is_string($description)
+        ) {
+            $this->sendError(
+                400,
+                'La descrizione deve essere una stringa'
+            );
+            return;
+        }
+
+        $listId =
+            (int) $data['list_id'];
+
+        if (
+            !$this->boardListGateway
+                ->findById($listId)
+        ) {
+            $this->sendError(
+                404,
+                'Lista non trovata'
+            );
+            return;
+        }
+
+        $id =
+            $this->cardGateway->create(
+                $listId,
+                trim($data['title']),
+                $description,
+                (int) $data['position']
+            );
 
         http_response_code(201);
 
@@ -847,93 +1331,192 @@ class Controller
         ]);
     }
 
+
     private function updateCard(
         int $id
     ): void {
-        $data = json_decode(
-            file_get_contents('php://input'),
-            true
-        );
+        if (
+            !$this->cardGateway
+                ->findById($id)
+        ) {
+            $this->sendError(
+                404,
+                'Card non trovata'
+            );
+            return;
+        }
+
+        $data =
+            $this->getJsonBody();
+
+        if ($data === null) {
+            $this->sendError(
+                400,
+                'JSON non valido'
+            );
+            return;
+        }
 
         if (
-            !is_array($data) ||
-            !isset($data['title']) ||
-            !isset($data['position'])
+            !array_key_exists(
+                'title',
+                $data
+            ) ||
+            !array_key_exists(
+                'position',
+                $data
+            )
         ) {
-            http_response_code(400);
+            $this->sendError(
+                400,
+                'title e position sono obbligatori'
+            );
+            return;
+        }
 
-            echo json_encode([
-                'error' =>
-                    'title e position sono obbligatori'
-            ]);
+        if (
+            !$this->isValidNonEmptyString(
+                $data['title'],
+                150
+            )
+        ) {
+            $this->sendError(
+                400,
+                'Il titolo deve essere una stringa non vuota di massimo 150 caratteri'
+            );
+            return;
+        }
 
+        if (
+            !$this->isValidPositiveInteger(
+                $data['position']
+            )
+        ) {
+            $this->sendError(
+                400,
+                'position deve essere un intero maggiore o uguale a 1'
+            );
             return;
         }
 
         $description =
             $data['description'] ?? null;
 
+        if (
+            $description !== null &&
+            !is_string($description)
+        ) {
+            $this->sendError(
+                400,
+                'La descrizione deve essere una stringa'
+            );
+            return;
+        }
+
         $this->cardGateway->update(
             $id,
-            $data['title'],
+            trim($data['title']),
             $description,
             (int) $data['position']
         );
 
-        echo json_encode([
-            'message' => 'Card aggiornata'
-        ]);
+        $this->sendMessage(
+            'Card aggiornata'
+        );
     }
+
 
     private function deleteCard(
         int $id
     ): void {
-        $this->cardGateway->delete(
-            $id
-        );
+        if (
+            !$this->cardGateway
+                ->findById($id)
+        ) {
+            $this->sendError(
+                404,
+                'Card non trovata'
+            );
+            return;
+        }
 
-        echo json_encode([
-            'message' => 'Card eliminata'
-        ]);
+        $this->cardGateway
+            ->delete($id);
+
+        $this->sendMessage(
+            'Card eliminata'
+        );
     }
 
-    // CARD MOVE
+
+    /* =========================================================
+       CARD MOVE
+       ========================================================= */
 
     private function moveCard(
         int $cardId
     ): void {
         $card =
-            $this->cardGateway->findById(
-                $cardId
-            );
+            $this->cardGateway
+                ->findById($cardId);
 
         if (!$card) {
-            http_response_code(404);
-
-            echo json_encode([
-                'error' => 'Card non trovata'
-            ]);
-
+            $this->sendError(
+                404,
+                'Card non trovata'
+            );
             return;
         }
 
-        $data = json_decode(
-            file_get_contents('php://input'),
-            true
-        );
+        $data =
+            $this->getJsonBody();
+
+        if ($data === null) {
+            $this->sendError(
+                400,
+                'JSON non valido'
+            );
+            return;
+        }
 
         if (
-            !is_array($data) ||
-            !isset($data['list_id']) ||
-            !isset($data['position'])
+            !array_key_exists(
+                'list_id',
+                $data
+            ) ||
+            !array_key_exists(
+                'position',
+                $data
+            )
         ) {
-            http_response_code(400);
+            $this->sendError(
+                400,
+                'list_id e position sono obbligatori'
+            );
+            return;
+        }
 
-            echo json_encode([
-                'error' =>
-                    'list_id e position sono obbligatori'
-            ]);
+        if (
+            !$this->isValidPositiveInteger(
+                $data['list_id']
+            )
+        ) {
+            $this->sendError(
+                400,
+                'list_id deve essere un intero positivo'
+            );
+            return;
+        }
 
+        if (
+            !$this->isValidPositiveInteger(
+                $data['position']
+            )
+        ) {
+            $this->sendError(
+                400,
+                'position deve essere un intero maggiore o uguale a 1'
+            );
             return;
         }
 
@@ -944,29 +1527,14 @@ class Controller
             (int) $data['position'];
 
         $list =
-            $this->boardListGateway->findById(
-                $listId
-            );
+            $this->boardListGateway
+                ->findById($listId);
 
         if (!$list) {
-            http_response_code(404);
-
-            echo json_encode([
-                'error' =>
-                    'Lista di destinazione non trovata'
-            ]);
-
-            return;
-        }
-
-        if ($position < 1) {
-            http_response_code(400);
-
-            echo json_encode([
-                'error' =>
-                    'position deve essere maggiore o uguale a 1'
-            ]);
-
+            $this->sendError(
+                404,
+                'Lista di destinazione non trovata'
+            );
             return;
         }
 
@@ -976,28 +1544,28 @@ class Controller
             $position
         );
 
-        echo json_encode([
-            'message' => 'Card spostata'
-        ]);
+        $this->sendMessage(
+            'Card spostata'
+        );
     }
 
-    // CARD ASSIGNMENTS
+
+    /* =========================================================
+       CARD ASSIGNMENTS
+       ========================================================= */
 
     private function getCardAssignments(
         int $cardId
     ): void {
         $card =
-            $this->cardGateway->findById(
-                $cardId
-            );
+            $this->cardGateway
+                ->findById($cardId);
 
         if (!$card) {
-            http_response_code(404);
-
-            echo json_encode([
-                'error' => 'Card non trovata'
-            ]);
-
+            $this->sendError(
+                404,
+                'Card non trovata'
+            );
             return;
         }
 
@@ -1007,40 +1575,39 @@ class Controller
         );
     }
 
+
     private function addCardAssignment(
         int $cardId
     ): void {
         $card =
-            $this->cardGateway->findById(
-                $cardId
-            );
+            $this->cardGateway
+                ->findById($cardId);
 
         if (!$card) {
-            http_response_code(404);
-
-            echo json_encode([
-                'error' => 'Card non trovata'
-            ]);
-
+            $this->sendError(
+                404,
+                'Card non trovata'
+            );
             return;
         }
 
-        $data = json_decode(
-            file_get_contents('php://input'),
-            true
-        );
+        $data =
+            $this->getJsonBody();
 
         if (
-            !is_array($data) ||
-            !isset($data['user_id'])
+            $data === null ||
+            !array_key_exists(
+                'user_id',
+                $data
+            ) ||
+            !$this->isValidPositiveInteger(
+                $data['user_id']
+            )
         ) {
-            http_response_code(400);
-
-            echo json_encode([
-                'error' =>
-                    'user_id è obbligatorio'
-            ]);
-
+            $this->sendError(
+                400,
+                'user_id deve essere un intero positivo'
+            );
             return;
         }
 
@@ -1048,32 +1615,27 @@ class Controller
             (int) $data['user_id'];
 
         if (
-            !$this->userGateway->findById(
-                $userId
-            )
+            !$this->userGateway
+                ->findById($userId)
         ) {
-            http_response_code(404);
-
-            echo json_encode([
-                'error' => 'Utente non trovato'
-            ]);
-
+            $this->sendError(
+                404,
+                'Utente non trovato'
+            );
             return;
         }
 
         $list =
-            $this->boardListGateway->findById(
-                (int) $card['list_id']
-            );
+            $this->boardListGateway
+                ->findById(
+                    (int) $card['list_id']
+                );
 
         if (!$list) {
-            http_response_code(404);
-
-            echo json_encode([
-                'error' =>
-                    'Lista della card non trovata'
-            ]);
-
+            $this->sendError(
+                404,
+                'Lista della card non trovata'
+            );
             return;
         }
 
@@ -1081,34 +1643,30 @@ class Controller
             (int) $list['board_id'];
 
         if (
-            !$this->boardMemberGateway->isMember(
-                $boardId,
-                $userId
-            )
+            !$this->boardMemberGateway
+                ->isMember(
+                    $boardId,
+                    $userId
+                )
         ) {
-            http_response_code(400);
-
-            echo json_encode([
-                'error' =>
-                    'L\'utente non è membro della board'
-            ]);
-
+            $this->sendError(
+                400,
+                'L\'utente non è membro della board'
+            );
             return;
         }
 
         if (
-            $this->cardAssignmentGateway->isAssigned(
-                $cardId,
-                $userId
-            )
+            $this->cardAssignmentGateway
+                ->isAssigned(
+                    $cardId,
+                    $userId
+                )
         ) {
-            http_response_code(409);
-
-            echo json_encode([
-                'error' =>
-                    'Utente già assegnato alla card'
-            ]);
-
+            $this->sendError(
+                409,
+                'Utente già assegnato alla card'
+            );
             return;
         }
 
@@ -1120,28 +1678,24 @@ class Controller
 
         http_response_code(201);
 
-        echo json_encode([
-            'message' =>
-                'Utente assegnato alla card'
-        ]);
+        $this->sendMessage(
+            'Utente assegnato alla card'
+        );
     }
+
 
     private function removeCardAssignment(
         int $cardId,
         int $userId
     ): void {
-        $card =
-            $this->cardGateway->findById(
-                $cardId
+        if (
+            !$this->cardGateway
+                ->findById($cardId)
+        ) {
+            $this->sendError(
+                404,
+                'Card non trovata'
             );
-
-        if (!$card) {
-            http_response_code(404);
-
-            echo json_encode([
-                'error' => 'Card non trovata'
-            ]);
-
             return;
         }
 
@@ -1152,13 +1706,10 @@ class Controller
                     $userId
                 )
         ) {
-            http_response_code(404);
-
-            echo json_encode([
-                'error' =>
-                    'Utente non assegnato alla card'
-            ]);
-
+            $this->sendError(
+                404,
+                'Utente non assegnato alla card'
+            );
             return;
         }
 
@@ -1168,9 +1719,8 @@ class Controller
                 $userId
             );
 
-        echo json_encode([
-            'message' =>
-                'Assegnazione rimossa'
-        ]);
+        $this->sendMessage(
+            'Assegnazione rimossa'
+        );
     }
 }

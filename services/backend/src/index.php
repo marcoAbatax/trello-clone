@@ -1,7 +1,7 @@
 <?php
 
-ini_set('display_errors', 1);
-ini_set('display_startup_errors', 1);
+ini_set('display_errors', '0');
+ini_set('display_startup_errors', '0');
 error_reporting(E_ALL);
 
 header('Content-Type: application/json');
@@ -22,9 +22,19 @@ try {
     $controller->handleRequest();
 
 } catch (Throwable $exception) {
+
+    error_log(
+        sprintf(
+            "Errore backend: %s in %s:%d",
+            $exception->getMessage(),
+            $exception->getFile(),
+            $exception->getLine()
+        )
+    );
+
     http_response_code(500);
 
     echo json_encode([
-        'error' => $exception->getMessage()
+        'error' => 'Errore interno del server'
     ]);
 }
